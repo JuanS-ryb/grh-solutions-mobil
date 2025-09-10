@@ -37,7 +37,7 @@ class MainLayout extends StatelessWidget {
           NavigationDestination(
               icon: Icon(Icons.calendar_month), label: 'Horarios'),
           NavigationDestination(icon: Icon(Icons.info), label: 'Solicitudes'),
-          NavigationDestination(icon: Icon(Icons.add), label: 'Messages'),
+          NavigationDestination(icon: Icon(Icons.work), label: 'Vacantes'),
           NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
