@@ -3,8 +3,13 @@ import 'widgets/horario/horario.dart';
 import 'widgets/login/login.dart';
 import 'widgets/layout/layout.dart';
 import 'widgets/comunicados.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
-void main() => runApp(const MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('es_ES', null); 
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
