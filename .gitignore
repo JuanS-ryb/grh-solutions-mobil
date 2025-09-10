@@ -1,0 +1,9 @@
+/.dart_tool
+/android
+/build
+/android
+/ios
+/android
+android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+/android
+pubspec.lock
