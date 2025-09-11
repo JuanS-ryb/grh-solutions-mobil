@@ -156,7 +156,7 @@ class _LoginFormState extends State<LoginForm> {
     print('Login con: ${_emailController.text} / ${_passwordController.text}');
 
     // Go to the next screen if login successful
-    Navigator.pushNamed(context, '/comunicados');
+    Navigator.pushNamed(context, '/vacantes');
   }
 
   @override

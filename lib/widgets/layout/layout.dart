@@ -5,10 +5,10 @@ class MainLayout extends StatelessWidget {
   const MainLayout({super.key, required this.child});
 
   static const List<String> routes = [
+    '/vacantes',
     '/comunicados',
     '/horarios',
     '/profile',
-    '/vacantes',
     '/solicitud'
   ];
 
@@ -33,11 +33,11 @@ class MainLayout extends StatelessWidget {
         selectedIndex: selectedIndex,
         onDestinationSelected: (index) => onDestinationSelected(context, index),
         destinations: const [
+          NavigationDestination(icon: Icon(Icons.home), label: 'Vacantes'),
           NavigationDestination(icon: Icon(Icons.mail), label: 'Comunicados'),
           NavigationDestination(
               icon: Icon(Icons.calendar_month), label: 'Horarios'),
           NavigationDestination(icon: Icon(Icons.info), label: 'Solicitudes'),
-          NavigationDestination(icon: Icon(Icons.work), label: 'Vacantes'),
           NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),

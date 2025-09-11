@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
 
-class Vacant extends StatefulWidget {
-  const Vacant({Key? key}) : super(key: key);
+class myVacant extends StatefulWidget {
+  const myVacant({Key? key}) : super(key: key);
 
   @override
-  State<Vacant> createState() => _VacantState();
+  State<myVacant> createState() => _myVacantState();
 }
 
-class _VacantState extends State<Vacant> {
+class _myVacantState extends State<myVacant> {
   final TextEditingController _controller = TextEditingController();
   bool _isRemote = false;
-  void _myVacants() {
-    Navigator.pushNamed(context, '/my_vacants');
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -119,26 +116,6 @@ class _VacantState extends State<Vacant> {
                   ],
                 ),
               ),
-
-              SizedBox(height: 30),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _myVacants,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 2, 136, 246),
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: const Text(
-                    'Ver tus postulaciones',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20), // Espaciado inferior
             ],
           ),
         ),
