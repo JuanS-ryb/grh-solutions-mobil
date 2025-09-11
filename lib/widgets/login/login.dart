@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:grhsolutions/data/notifiers.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -156,52 +157,68 @@ class _LoginFormState extends State<LoginForm> {
     print('Login con: ${_emailController.text} / ${_passwordController.text}');
 
     // Go to the next screen if login successful
-    Navigator.pushNamed(context, '/comunicados');
+    Navigator.pushNamed(context, '/logged');
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Iniciar sesión',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 24),
-        TextField(
-          controller: _emailController,
-          decoration: const InputDecoration(
-            labelText: 'Correo',
-            border: OutlineInputBorder(),
+    return ValueListenableBuilder<bool>(
+      valueListenable: isLoggedIn,
+      builder: (context, loggedIn, _) {
+        return Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Iniciar sesión',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 24),
+              TextField(
+                controller: _emailController,
+                decoration: const InputDecoration(
+                  labelText: 'Correo',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _passwordController,
+                obscureText: !_passwordVisible,
+                decoration: InputDecoration(
+                  labelText: 'Contraseña',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _passwordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _passwordVisible = !_passwordVisible;
+                      });
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: () {
+                    isLoggedIn.value = true; // Marcar como logeado
+                  },
+                  child: const Text('Login'),
+                ),
+              ),
+            ],
           ),
-          keyboardType: TextInputType.emailAddress,
-        ),
-        const SizedBox(height: 16),
-        TextField(
-          controller: _passwordController,
-          obscureText: !_passwordVisible,
-          decoration: InputDecoration(
-            labelText: 'Contraseña',
-            border: const OutlineInputBorder(),
-            suffixIcon: IconButton(
-              icon: Icon(
-                  _passwordVisible ? Icons.visibility : Icons.visibility_off),
-              onPressed: () =>
-                  setState(() => _passwordVisible = !_passwordVisible),
-            ),
-          ),
-        ),
-        const SizedBox(height: 24),
-        SizedBox(
-          width: double.infinity,
-          height: 48,
-          child: ElevatedButton(
-            onPressed: _login,
-            child: const Text('Login'),
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
 }
