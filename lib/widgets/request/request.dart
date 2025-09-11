@@ -1,22 +1,223 @@
 import 'package:flutter/material.dart';
+import 'request_created.dart';
+import 'request_view.dart';
 
 class Request extends StatefulWidget {
-  const Request({super.key});
+  const Request({Key? key}) : super(key: key);
 
   @override
   State<Request> createState() => _RequestState();
 }
 
+class RequestItem {
+  final String radicado;
+  final String estado;
+  final Color color;
+  final String titulo;
+  final String desde;
+  final String hasta;
+
+  const RequestItem({
+    required this.radicado,
+    required this.estado,
+    required this.color,
+    required this.titulo,
+    required this.desde,
+    required this.hasta,
+  });
+}
+
 class _RequestState extends State<Request> {
+  final List<RequestItem> _requests = [
+    RequestItem(
+      radicado: "SOL-20250313",
+      estado: "Aprobada",
+      color: Colors.greenAccent.shade100,
+      titulo: "Solicitud urgente..",
+      desde: "09/10/24 12:12 AM",
+      hasta: "3/31/23 2:52 PM",
+    ),
+    RequestItem(
+      radicado: "SOL-20250313",
+      estado: "Rechazada",
+      color: Colors.redAccent.shade100,
+      titulo: "Revisión final..",
+      desde: "09/10/24 5:14 PM",
+      hasta: "3/31/23 2:52 PM",
+    ),
+    RequestItem(
+      radicado: "SOL-20250313",
+      estado: "En proceso",
+      color: Colors.grey.shade300,
+      titulo: "Documentos completos..",
+      desde: "09/10/24 10:45 AM",
+      hasta: "3/31/23 2:52 PM",
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(child: const Text("hola buenas tardes")),
-        Container(
-          child: const Text("hoal"),
-        )
-      ],
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Solicitudes",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 22,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.filter_alt_outlined),
+                )
+              ],
+            ),
+            const SizedBox(height: 8),
+
+            Expanded(
+              child: ListView.builder(
+                itemCount: _requests.length,
+                itemBuilder: (context, index) {
+                  final req = _requests[index];
+                  return InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const RequestView(),
+                        ),
+                      );
+                    },
+                    child: Card(
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // fila superior: radicado + estado (chip)
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "Radicado: ${req.radicado}",
+                                  style: const TextStyle(
+                                    color: Colors.blue,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: req.color,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 6),
+                                  child: Text(
+                                    req.estado,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            const Divider(height: 1),
+                            const SizedBox(height: 10),
+                            // contenido con título + fechas (izq/derecha)
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        req.titulo,
+                                        style: TextStyle(
+                                          color: Colors.grey[700],
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        req.desde,
+                                        style: const TextStyle(
+                                            fontSize: 13,
+                                            color: Colors.black87,
+                                            fontWeight: FontWeight.w500),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      "Desde",
+                                      style: TextStyle(color: Colors.grey[600]),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      req.hasta,
+                                      style: const TextStyle(
+                                          fontSize: 13,
+                                          color: Colors.black87,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            // --- Botón inferior ---
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const RequestCreated(),
+                      ),
+                    );
+                  },
+                  child: const Text("Crear Solicitud",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.white,
+                      )),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
