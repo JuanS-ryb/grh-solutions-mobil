@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 
 class Horario extends StatefulWidget {
@@ -9,142 +10,85 @@ class Horario extends StatefulWidget {
 }
 
 class _HorarioState extends State<Horario> {
-  DateTime currentDate = DateTime.now(); // Mes actual
-  int? selectedDay;
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
+
+  // datos desde la BD (aqui quemados para que aparezca algo mientras jijiji)
+  final String grupo = "Grupo A"; // Grupo (desde BD wasaaaa)
+  final Map<DateTime, String> horarios = {
+    DateTime.utc(2026, 9, 1): "Diurno",
+    DateTime.utc(2026, 9, 2): "Nocturno",
+    DateTime.utc(2026, 9, 3): "Mixto",
+    DateTime.utc(2026, 9, 9): "Diurno",
+    DateTime.utc(2026, 9, 15): "Nocturno",
+  };
 
   @override
   Widget build(BuildContext context) {
-    // Nombre del mes actual
-    String monthName = DateFormat('MMMM yyyy', 'es_ES').format(currentDate);
-
-    // Lista de meses (para el menú horizontal)
-    List<DateTime> months = List.generate(
-      12,
-      (i) => DateTime(currentDate.year, i + 1),
-    );
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("Calendario"),
       ),
       body: Column(
         children: [
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
-          // Título con el mes actual
+          // Grupo (desde BD wasaaaa)
           Text(
-            monthName[0].toUpperCase() + monthName.substring(1),
-            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            "Grupo: $grupo",
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 12),
 
-          // Menú horizontal de meses
-          SizedBox(
-            height: 50,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: months.length,
-              itemBuilder: (context, index) {
-                String name = DateFormat('MMM', 'es_ES').format(months[index]);
-                bool isSelected = months[index].month == currentDate.month;
-
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      currentDate = months[index];
-                      selectedDay = null; // Reiniciar selección
-                    });
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 8),
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 8, horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: isSelected ? Colors.blue : Colors.grey[200],
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Center(
-                      child: Text(
-                        name,
-                        style: TextStyle(
-                          color: isSelected ? Colors.white : Colors.black,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
+          TableCalendar(
+            firstDay: DateTime.utc(2020, 1, 1),
+            lastDay: DateTime.utc(2030, 12, 31),
+            focusedDay: _focusedDay,
+            locale: 'es_ES',
+            selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+            headerStyle: const HeaderStyle(
+              formatButtonVisible: false,
+              titleCentered: true,
             ),
-          ),
-
-          const SizedBox(height: 12),
-
-          // Encabezado días de la semana
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: const [
-              Text("D"),
-              Text("L"),
-              Text("M"),
-              Text("M"),
-              Text("J"),
-              Text("V"),
-              Text("S"),
-            ],
-          ),
-
-          const SizedBox(height: 8),
-
-          // Calendario (días del mes actual)
-          Expanded(
-            child: GridView.builder(
-              padding: const EdgeInsets.all(16),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 7,
-                mainAxisSpacing: 8,
-                crossAxisSpacing: 8,
+            calendarStyle: const CalendarStyle(
+              todayDecoration: BoxDecoration(
+                color: Colors.blueAccent,
+                shape: BoxShape.circle,
               ),
-              itemCount: DateUtils.getDaysInMonth(
-                  currentDate.year, currentDate.month),
-              itemBuilder: (context, index) {
-                final day = index + 1;
-                final isSelected = selectedDay == day;
-
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      selectedDay = day;
-                    });
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: isSelected ? Colors.blue : Colors.grey[200],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      "$day",
-                      style: TextStyle(
-                        color: isSelected ? Colors.white : Colors.black,
-                        fontWeight: isSelected
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                      ),
-                    ),
-                  ),
-                );
+              selectedDecoration: BoxDecoration(
+                color: Colors.blue,
+                shape: BoxShape.circle,
+              ),
+            ),
+            onDaySelected: (selectedDay, focusedDay) {
+              setState(() {
+                _selectedDay = selectedDay;
+                _focusedDay = focusedDay;
+              });
+            },
+            calendarBuilders: CalendarBuilders(
+              defaultBuilder: (context, day, focusedDay) {
+                return _buildDayCell(day);
+              },
+              todayBuilder: (context, day, focusedDay) {
+                return _buildDayCell(day, isToday: true);
+              },
+              selectedBuilder: (context, day, focusedDay) {
+                return _buildDayCell(day, isSelected: true);
               },
             ),
           ),
 
-          // Botón
+          const Spacer(),
+
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
               onPressed: () {
-                // Por ahora no hace nada
+                if (_selectedDay != null) {
+                  debugPrint("Generar inasistencia para $_selectedDay");
+                }
               },
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size.fromHeight(50),
@@ -154,6 +98,43 @@ class _HorarioState extends State<Horario> {
           )
         ],
       ),
+    );
+  }
+
+  /// Construye la celda personalizada para cada día.
+  Widget _buildDayCell(DateTime day, {bool isToday = false, bool isSelected = false}) {
+    final String? horario = horarios[DateTime.utc(day.year, day.month, day.day)];
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: isSelected
+                ? Colors.blue
+                : isToday
+                    ? Colors.blueAccent
+                    : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            '${day.day}',
+            style: TextStyle(
+              color: isSelected || isToday ? Colors.white : Colors.black,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          horario ?? "",
+          style: const TextStyle(fontSize: 10, color: Colors.grey),
+          textAlign: TextAlign.center,
+        ),
+      ],
     );
   }
 }
