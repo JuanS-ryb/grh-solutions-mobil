@@ -219,7 +219,7 @@ class _LoginFormState extends State<LoginForm> {
                     isLoggedIn.value = true; // Marcar como logeado
                     Navigator.of(context).pop();
                   },
-                  style: ButtonStyle(backgroundColor: Colors.black),
+                  style: ButtonStyle(),
                   child: Text('Login', style: theme.textTheme.bodyMedium),
                 ),
               ),
