@@ -3,7 +3,6 @@ import 'package:grhsolutions/widgets/request/request.dart';
 import 'widgets/comunicados/comunicados.dart';
 import 'widgets/horario/horario.dart';
 import 'widgets/login/login.dart';
-import 'widgets/layout/layout.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'data/notifiers.dart'; // donde tienes renderNotificator, isLoggedIn y useDarkTheme
 import 'theme/custom-themes.dart';
