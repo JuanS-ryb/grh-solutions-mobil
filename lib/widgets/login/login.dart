@@ -9,7 +9,7 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  void _showLoginModal() {
+  void showLoginModal(Color bg) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true, // para que tome el tamaño correcto con teclado
@@ -23,9 +23,10 @@ class _LoginState extends State<Login> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
             height: 350,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+            decoration: BoxDecoration(
+              color: bg,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(30)),
             ),
             child: const LoginForm(),
           ),
@@ -34,7 +35,7 @@ class _LoginState extends State<Login> {
     );
   }
 
-  void _showRegisterModal() {
+  void showRegisterModal(Color bg) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -47,9 +48,10 @@ class _LoginState extends State<Login> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
             height: 400,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+            decoration: BoxDecoration(
+              color: bg,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(30)),
             ),
             child: const RegisterForm(),
           ),
@@ -60,8 +62,10 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: Colors.grey,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Align(
           alignment: Alignment.bottomCenter,
@@ -69,13 +73,13 @@ class _LoginState extends State<Login> {
             height: 230,
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
+            decoration: BoxDecoration(
+              color: theme.cardColor,
+              borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(30),
                 topRight: Radius.circular(30),
               ),
-              boxShadow: [
+              boxShadow: const [
                 BoxShadow(
                   color: Colors.black26,
                   blurRadius: 10,
@@ -95,13 +99,14 @@ class _LoginState extends State<Login> {
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton.icon(
-                  onPressed: _showLoginModal,
-                  icon: const Icon(Icons.login, color: Colors.black),
-                  label: const Text("INGRESAR",
-                      style: TextStyle(color: Colors.black)),
+                  onPressed: () {
+                    showLoginModal(theme.cardColor);
+                  },
+                  icon: Icon(Icons.login, color: theme.iconTheme.color),
+                  label: Text("INGRESAR", style: theme.textTheme.bodyMedium),
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 48),
-                    backgroundColor: Colors.blueAccent,
+                    backgroundColor: theme.primaryColor,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -110,14 +115,13 @@ class _LoginState extends State<Login> {
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton.icon(
-                  onPressed: _showRegisterModal,
-                  icon: const Icon(Icons.person_add, color: Colors.black),
-                  label: const Text("REGISTRARSE",
-                      style: TextStyle(color: Colors.black)),
+                  onPressed: () {
+                    showRegisterModal(theme.cardColor);
+                  },
+                  icon: Icon(Icons.person_add, color: theme.iconTheme.color),
+                  label: Text("REGISTRARSE", style: theme.textTheme.bodyMedium),
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 48),
-                    backgroundColor: Colors.grey,
-                    foregroundColor: Colors.black87,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -162,11 +166,13 @@ class _LoginFormState extends State<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return ValueListenableBuilder<bool>(
       valueListenable: isLoggedIn,
       builder: (context, loggedIn, _) {
-        return Padding(
-          padding: const EdgeInsets.all(24.0),
+        return Container(
+          decoration: BoxDecoration(color: theme.cardColor),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -211,8 +217,10 @@ class _LoginFormState extends State<LoginForm> {
                 child: ElevatedButton(
                   onPressed: () {
                     isLoggedIn.value = true; // Marcar como logeado
+                    Navigator.of(context).pop();
                   },
-                  child: const Text('Login'),
+                  style: ButtonStyle(backgroundColor: Colors.black),
+                  child: Text('Login', style: theme.textTheme.bodyMedium),
                 ),
               ),
             ],

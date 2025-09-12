@@ -3,7 +3,8 @@ import 'package:grhsolutions/widgets/request/request.dart';
 import 'widgets/comunicados/comunicados.dart';
 import 'widgets/horario/horario.dart';
 import 'widgets/login/login.dart';
-import 'data/notifiers.dart'; // donde tienes renderNotificator y isLoggedIn
+import 'data/notifiers.dart'; // donde tienes renderNotificator, isLoggedIn y useDarkTheme
+import 'theme/custom-themes.dart';
 
 void main() => runApp(const MyApp());
 
@@ -12,73 +13,73 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: ValueListenableBuilder<bool>(
-        valueListenable: isLoggedIn,
-        builder: (context, loggedIn, _) {
-          // Si no está logeado, mostramos el Login
-          if (!loggedIn) {
-            return const Login(); // Puedes cambiar esto por tu widget real de login
-          }
+    // Usamos ValueListenableBuilder para escuchar useDarkTheme
+    return ValueListenableBuilder<bool>(
+      valueListenable: useDarkTheme,
+      builder: (context, isDarkMode, _) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: lightTheme,
+          darkTheme: darkTheme,
+          themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
+          home: ValueListenableBuilder<bool>(
+            valueListenable: isLoggedIn,
+            builder: (context, loggedIn, _) {
+              if (!loggedIn) {
+                return const Login();
+              }
+              return ValueListenableBuilder<int>(
+                valueListenable: renderNotificator,
+                builder: (context, selectedIndex, _) {
+                  final List<Widget> widgetOptions = [
+                    const Comunicados(),
+                    const Request(),
+                    const Center(child: Text("Vacantes")),
+                    const Horario(),
+                    const Center(child: Text("Perfil")),
+                  ];
 
-          // Si está logeado, mostramos la app principal con BottomNavigationBar
-          return ValueListenableBuilder<int>(
-            valueListenable: renderNotificator,
-            builder: (context, selectedIndex, _) {
-              final List<Widget> widgetOptions = [
-                const Comunicados(),
-                const Request(),
-                const Center(
-                  child: Text("Vacantes"),
-                ),
-                const Horario(),
-                const Center(child: Text("Perfil")),
-              ];
-
-              return Scaffold(
-                body: widgetOptions[selectedIndex],
-                bottomNavigationBar: BottomNavigationBar(
-                  backgroundColor: Colors.white,
-                  showSelectedLabels: false,
-                  showUnselectedLabels: false,
-                  type: BottomNavigationBarType.fixed,
-                  iconSize: 20,
-                  items: const <BottomNavigationBarItem>[
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.home),
-                      label: 'Home', // COMUNICADOS
+                  return Scaffold(
+                    body: widgetOptions[selectedIndex],
+                    bottomNavigationBar: BottomNavigationBar(
+                      showSelectedLabels: false,
+                      showUnselectedLabels: false,
+                      type: BottomNavigationBarType.fixed,
+                      iconSize: 20,
+                      items: const <BottomNavigationBarItem>[
+                        BottomNavigationBarItem(
+                          icon: Icon(Icons.home),
+                          label: 'Home',
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Icon(Icons.question_mark),
+                          label: 'Solicitud',
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Icon(Icons.work),
+                          label: 'Vacancy',
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Icon(Icons.calendar_month),
+                          label: 'Horarios',
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Icon(Icons.person),
+                          label: 'Perfil',
+                        ),
+                      ],
+                      currentIndex: selectedIndex,
+                      onTap: (index) {
+                        renderNotificator.value = index;
+                      },
                     ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.question_mark),
-                      label: 'Solicitud', // REQUEST
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.work),
-                      label: 'VANCANCY',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.calendar_month),
-                      label: 'HORARIOS',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.person),
-                      label: 'PERFIL',
-                    ),
-                  ],
-                  currentIndex: selectedIndex,
-                  onTap: (index) {
-                    renderNotificator.value = index;
-                  },
-                ),
+                  );
+                },
               );
             },
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }
