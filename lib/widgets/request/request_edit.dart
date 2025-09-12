@@ -1,18 +1,49 @@
 import 'package:flutter/material.dart';
 
-class RequestCreated extends StatefulWidget {
-  const RequestCreated({Key? key}) : super(key: key);
+class RequestEdit extends StatefulWidget {
+  final String title;
+  final String description;
+  final String type;
+  final DateTime fromDate;
+  final DateTime toDate;
+
+  const RequestEdit({
+    Key? key,
+    required this.title,
+    required this.description,
+    required this.type,
+    required this.fromDate,
+    required this.toDate,
+  }) : super(key: key);
 
   @override
-  State<RequestCreated> createState() => _RequestCreatedState();
+  State<RequestEdit> createState() => _RequestEditState();
 }
 
-class _RequestCreatedState extends State<RequestCreated> {
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
+class _RequestEditState extends State<RequestEdit> {
+  late TextEditingController _titleController;
+  late TextEditingController _descriptionController;
   String? _selectedType;
   DateTime? _fromDate;
   DateTime? _toDate;
+
+  @override
+  void initState() {
+    super.initState();
+    // Inicializamos los controladores con los valores recibidos
+    _titleController = TextEditingController(text: widget.title);
+    _descriptionController = TextEditingController(text: widget.description);
+    _selectedType = widget.type;
+    _fromDate = widget.fromDate;
+    _toDate = widget.toDate;
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +58,7 @@ class _RequestCreatedState extends State<RequestCreated> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          "Crear Solicitud",
+          "Editar Solicitud",
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
             color: theme.colorScheme.onBackground,
@@ -35,6 +66,7 @@ class _RequestCreatedState extends State<RequestCreated> {
         ),
         centerTitle: true,
       ),
+
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -54,7 +86,7 @@ class _RequestCreatedState extends State<RequestCreated> {
                         // Campo Titulo
                         TextField(
                           controller: _titleController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: "Titulo:",
                             hintText: "Nombre de la solicitud",
                           ),
@@ -88,12 +120,16 @@ class _RequestCreatedState extends State<RequestCreated> {
                           },
                         ),
                         const SizedBox(height: 16),
+
+                        // Desde
                         _buildDateField("Desde:", _fromDate, (date) {
                           setState(() {
                             _fromDate = date;
                           });
                         }),
                         const SizedBox(height: 16),
+
+                        // Hasta
                         _buildDateField("Hasta:", _toDate, (date) {
                           setState(() {
                             _toDate = date;
@@ -101,6 +137,7 @@ class _RequestCreatedState extends State<RequestCreated> {
                         }),
                         const SizedBox(height: 16),
 
+                        // Descripción
                         TextField(
                           controller: _descriptionController,
                           maxLines: 4,
@@ -115,11 +152,15 @@ class _RequestCreatedState extends State<RequestCreated> {
                 ),
               ),
             ),
+
+            // Botón Aplicar
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Crear"),
+                onPressed: () {
+                  Navigator.pop(context); // vuelve a la vista de detalles
+                },
+                child: const Text("Aplicar"),
               ),
             ),
           ],
@@ -128,6 +169,7 @@ class _RequestCreatedState extends State<RequestCreated> {
     );
   }
 
+  // Método de campos de fecha
   Widget _buildDateField(
       String label, DateTime? date, Function(DateTime) onDateSelected) {
     final theme = Theme.of(context);
@@ -136,7 +178,7 @@ class _RequestCreatedState extends State<RequestCreated> {
       onTap: () async {
         DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: DateTime.now(),
+          initialDate: date ?? DateTime.now(),
           firstDate: DateTime(2000),
           lastDate: DateTime(2100),
         );
@@ -149,9 +191,7 @@ class _RequestCreatedState extends State<RequestCreated> {
           labelText: label,
         ),
         child: Text(
-          date != null
-              ? "${date.day}/${date.month}/${date.year}"
-              : "dd/mm/aaaa",
+          date != null ? "${date.day}/${date.month}/${date.year}" : "dd/mm/aaaa",
           style: theme.textTheme.bodyMedium?.copyWith(
             color: date == null ? theme.hintColor : theme.colorScheme.onSurface,
           ),

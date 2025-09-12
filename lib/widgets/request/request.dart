@@ -32,7 +32,7 @@ class _RequestState extends State<Request> {
     RequestItem(
       radicado: "SOL-20250313",
       estado: "Aprobada",
-      color: Colors.greenAccent.shade100,
+      color: Colors.greenAccent, // se mantiene (es estado)
       titulo: "Solicitud urgente..",
       desde: "09/10/24 12:12 AM",
       hasta: "3/31/23 2:52 PM",
@@ -40,7 +40,7 @@ class _RequestState extends State<Request> {
     RequestItem(
       radicado: "SOL-20250313",
       estado: "Rechazada",
-      color: Colors.redAccent.shade100,
+      color: Colors.redAccent,
       titulo: "Revisión final..",
       desde: "09/10/24 5:14 PM",
       hasta: "3/31/23 2:52 PM",
@@ -48,7 +48,7 @@ class _RequestState extends State<Request> {
     RequestItem(
       radicado: "SOL-20250313",
       estado: "En proceso",
-      color: Colors.grey.shade300,
+      color: Colors.grey,
       titulo: "Documentos completos..",
       desde: "09/10/24 10:45 AM",
       hasta: "3/31/23 2:52 PM",
@@ -57,6 +57,8 @@ class _RequestState extends State<Request> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12),
@@ -65,16 +67,16 @@ class _RequestState extends State<Request> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   "Solicitudes",
-                  style: TextStyle(
+                  style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
-                    fontSize: 22,
                   ),
                 ),
                 IconButton(
                   onPressed: () {},
-                  icon: const Icon(Icons.filter_alt_outlined),
+                  icon: Icon(Icons.filter_alt_outlined,
+                      color: theme.iconTheme.color),
                 )
               ],
             ),
@@ -99,6 +101,7 @@ class _RequestState extends State<Request> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
+                      color: theme.cardColor,
                       child: Padding(
                         padding: const EdgeInsets.all(12.0),
                         child: Column(
@@ -110,8 +113,8 @@ class _RequestState extends State<Request> {
                               children: [
                                 Text(
                                   "Radicado: ${req.radicado}",
-                                  style: const TextStyle(
-                                    color: Colors.blue,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.colorScheme.primary,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -124,14 +127,19 @@ class _RequestState extends State<Request> {
                                       horizontal: 10, vertical: 6),
                                   child: Text(
                                     req.estado,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold),
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: theme.colorScheme.onPrimary,
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 10),
-                            const Divider(height: 1),
+                            Divider(
+                              height: 1,
+                              color: theme.dividerColor,
+                            ),
                             const SizedBox(height: 10),
                             // contenido con título + fechas (izq/derecha)
                             Row(
@@ -143,17 +151,20 @@ class _RequestState extends State<Request> {
                                     children: [
                                       Text(
                                         req.titulo,
-                                        style: TextStyle(
-                                          color: Colors.grey[700],
+                                        style:
+                                            theme.textTheme.bodyMedium?.copyWith(
+                                          color: theme
+                                              .textTheme.bodyMedium?.color,
                                         ),
                                       ),
                                       const SizedBox(height: 8),
                                       Text(
                                         req.desde,
-                                        style: const TextStyle(
-                                            fontSize: 13,
-                                            color: Colors.black87,
-                                            fontWeight: FontWeight.w500),
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w500,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -163,15 +174,19 @@ class _RequestState extends State<Request> {
                                   children: [
                                     Text(
                                       "Desde",
-                                      style: TextStyle(color: Colors.grey[600]),
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                        color: theme.hintColor,
+                                      ),
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
                                       req.hasta,
-                                      style: const TextStyle(
-                                          fontSize: 13,
-                                          color: Colors.black87,
-                                          fontWeight: FontWeight.w500),
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -193,7 +208,7 @@ class _RequestState extends State<Request> {
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
+                    backgroundColor: theme.colorScheme.primary,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -207,11 +222,13 @@ class _RequestState extends State<Request> {
                       ),
                     );
                   },
-                  child: const Text("Crear Solicitud",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white,
-                      )),
+                  child: Text(
+                    "Crear Solicitud",
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      fontSize: 16,
+                      color: theme.colorScheme.onPrimary,
+                    ),
+                  ),
                 ),
               ),
             ),
