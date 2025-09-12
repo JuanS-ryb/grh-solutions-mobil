@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:grhsolutions/widgets/horario/inasistencia.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 
@@ -22,6 +23,37 @@ class _HorarioState extends State<Horario> {
     DateTime.utc(2026, 9, 9): "Diurno",
     DateTime.utc(2026, 9, 15): "Nocturno",
   };
+
+  void _navegarACrearInasistencia() {
+    if (_selectedDay == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor selecciona un día primero'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Obtener el horario del día seleccionado
+    final String? horarioSeleccionado = horarios[DateTime.utc(
+      _selectedDay!.year,
+      _selectedDay!.month,
+      _selectedDay!.day,
+    )];
+
+    // Navegar a la nueva pantalla
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CrearInasistencia(
+          fechaSeleccionada: _selectedDay!,
+          horario: horarioSeleccionado,
+          grupo: grupo,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,15 +117,17 @@ class _HorarioState extends State<Horario> {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
-              onPressed: () {
-                if (_selectedDay != null) {
-                  debugPrint("Generar inasistencia para $_selectedDay");
-                }
-              },
+              onPressed: _navegarACrearInasistencia,
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size.fromHeight(50),
+                backgroundColor: _selectedDay != null ? Colors.blue : Colors.grey,
               ),
-              child: const Text("Generar Inasistencia"),
+              child: Text(
+                _selectedDay != null 
+                  ? "Generar Inasistencia" 
+                  : "Selecciona un día",
+                style: const TextStyle(color: Colors.white),
+              ),
             ),
           )
         ],
