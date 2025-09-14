@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class Comunicados extends StatefulWidget {
-  const Comunicados({super.key});
+class Perfil extends StatefulWidget {
+  const Perfil({super.key});
 
   @override
-  State<Comunicados> createState() => _ComunicadosState();
+  State<Perfil> createState() => _PerfilState();
 }
 
-class _ComunicadosState extends State<Comunicados> {
+class _PerfilState extends State<Perfil> {
   @override
   Widget build(BuildContext context) {
     return Row(
