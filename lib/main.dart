@@ -5,6 +5,9 @@ import 'widgets/horario/horario.dart';
 import 'widgets/login/login.dart';
 import 'data/notifiers.dart'; // donde tienes renderNotificator, isLoggedIn y useDarkTheme
 import 'theme/custom-themes.dart';
+import 'domain/dio.dart';
+
+final api=ApiService(baseUrl: "http://localhost:3000");
 
 void main() => runApp(const MyApp());
 
