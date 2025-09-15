@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:grhsolutions/services/horarios/horario-services.dart';
 import 'package:grhsolutions/widgets/horario/inasistencia.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
@@ -14,6 +15,20 @@ class Horario extends StatefulWidget {
 class _HorarioState extends State<Horario> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
+  HorarioService horarioService = HorarioService();
+  String testResult = '';
+    @override
+  void initState() {
+    super.initState();
+    cargarHorarios();  
+  }
+
+  void cargarHorarios() async {
+    final test = await horarioService.testapi();
+    setState(() {
+      testResult = test;
+    });
+  }
 
   // datos desde la BD (aqui quemados para que aparezca algo mientras jijiji)
   final String grupo = "Grupo A"; // Grupo (desde BD wasaaaa)
@@ -68,7 +83,7 @@ class _HorarioState extends State<Horario> {
 
           // Grupo (desde BD wasaaaa)
           Text(
-            "Grupo: $grupo",
+            "Grupo: $grupo,$testResult",
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
 
