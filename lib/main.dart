@@ -5,7 +5,11 @@ import 'widgets/horario/horario.dart';
 import 'widgets/login/login.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'data/notifiers.dart'; // donde tienes renderNotificator, isLoggedIn y useDarkTheme
+import 'data/notifiers.dart';
 import 'theme/custom-themes.dart';
+import 'domain/dio.dart';
+
+final api=ApiService(baseUrl: "http://localhost:3000");
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +22,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Usamos ValueListenableBuilder para escuchar useDarkTheme
     return ValueListenableBuilder<bool>(
       valueListenable: useDarkTheme,
       builder: (context, isDarkMode, _) {

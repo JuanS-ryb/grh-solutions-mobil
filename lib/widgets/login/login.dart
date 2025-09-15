@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:grhsolutions/data/notifiers.dart';
+import 'package:grhsolutions/models/user/login-model.dart';
+import 'package:grhsolutions/services/user/login-services.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -12,21 +14,19 @@ class _LoginState extends State<Login> {
   void showLoginModal(Color bg) {
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true, // para que tome el tamaño correcto con teclado
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
       ),
       builder: (context) {
         return Padding(
-          padding: MediaQuery.of(context)
-              .viewInsets, // evitar que el teclado tape el contenido
+          padding: MediaQuery.of(context).viewInsets,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
             height: 350,
             decoration: BoxDecoration(
               color: bg,
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(30)),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
             ),
             child: const LoginForm(),
           ),
@@ -50,8 +50,7 @@ class _LoginState extends State<Login> {
             height: 400,
             decoration: BoxDecoration(
               color: bg,
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(30)),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
             ),
             child: const RegisterForm(),
           ),
@@ -99,9 +98,7 @@ class _LoginState extends State<Login> {
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton.icon(
-                  onPressed: () {
-                    showLoginModal(theme.cardColor);
-                  },
+                  onPressed: () => showLoginModal(theme.cardColor),
                   icon: Icon(Icons.login, color: theme.iconTheme.color),
                   label: Text("INGRESAR", style: theme.textTheme.bodyMedium),
                   style: ElevatedButton.styleFrom(
@@ -115,9 +112,7 @@ class _LoginState extends State<Login> {
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton.icon(
-                  onPressed: () {
-                    showRegisterModal(theme.cardColor);
-                  },
+                  onPressed: () => showRegisterModal(theme.cardColor),
                   icon: Icon(Icons.person_add, color: theme.iconTheme.color),
                   label: Text("REGISTRARSE", style: theme.textTheme.bodyMedium),
                   style: ElevatedButton.styleFrom(
@@ -136,7 +131,9 @@ class _LoginState extends State<Login> {
   }
 }
 
-// FORMULARIO LOGIN
+/// ------------------
+/// FORMULARIO LOGIN
+/// ------------------
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
 
@@ -148,6 +145,10 @@ class _LoginFormState extends State<LoginForm> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _passwordVisible = false;
+  final LoginService loginServices = LoginService();
+
+  bool _loading = false;
+  String? _error;
 
   @override
   void dispose() {
@@ -156,12 +157,36 @@ class _LoginFormState extends State<LoginForm> {
     super.dispose();
   }
 
-  void _login() {
-    // Aquí tu lógica de login
-    print('Login con: ${_emailController.text} / ${_passwordController.text}');
+  Future<void> handleLogin() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
 
-    // Go to the next screen if login successful
-    Navigator.pushNamed(context, '/logged');
+    try {
+      final loginResponse = await loginServices.login(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
+
+      //ACTUALIZA LAS VARIABLES DEL NOTIFICATOR DE ACUERDO A LA RESPONSE DEL LOGIN.
+      isLoggedIn.value = true;
+      loginController.value = loginResponse;
+
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+      
+    } catch (e) {
+      debugPrint('Error from endpoint --------------------- $e.toString()');
+      setState(() {
+        _error = "Hubo un error al comunicarse con el servidor";
+      });
+    } finally {
+      if (mounted) {
+        setState(() => _loading = false);
+      }
+    }
   }
 
   @override
@@ -171,67 +196,70 @@ class _LoginFormState extends State<LoginForm> {
     return ValueListenableBuilder<bool>(
       valueListenable: isLoggedIn,
       builder: (context, loggedIn, _) {
-        return Container(
-          decoration: BoxDecoration(color: theme.cardColor),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Iniciar sesión',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Iniciar sesión',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 24),
+            TextField(
+              controller: _emailController,
+              decoration: const InputDecoration(
+                labelText: 'Correo',
+                border: OutlineInputBorder(),
               ),
-              const SizedBox(height: 24),
-              TextField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Correo',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _passwordController,
-                obscureText: !_passwordVisible,
-                decoration: InputDecoration(
-                  labelText: 'Contraseña',
-                  border: const OutlineInputBorder(),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _passwordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _passwordVisible = !_passwordVisible;
-                      });
-                    },
+              keyboardType: TextInputType.emailAddress,
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _passwordController,
+              obscureText: !_passwordVisible,
+              decoration: InputDecoration(
+                labelText: 'Contraseña',
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _passwordVisible
+                        ? Icons.visibility
+                        : Icons.visibility_off,
                   ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
                   onPressed: () {
-                    isLoggedIn.value = true; // Marcar como logeado
-                    Navigator.of(context).pop();
+                    setState(() {
+                      _passwordVisible = !_passwordVisible;
+                    });
                   },
-                  style: ButtonStyle(),
-                  child: Text('Login', style: theme.textTheme.bodyMedium),
                 ),
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 24),
+            if (_error != null)
+              Text(
+                _error!,
+                style: const TextStyle(color: Colors.red),
+              ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: _loading ? null : handleLogin,
+                child: _loading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : Text('Login', style: theme.textTheme.bodyMedium),
+              ),
+            ),
+          ],
         );
       },
     );
   }
 }
 
-// FORMULARIO REGISTRO
+/// ------------------
+/// FORMULARIO REGISTRO
+/// ------------------
 class RegisterForm extends StatefulWidget {
   const RegisterForm({super.key});
 
@@ -255,13 +283,12 @@ class _RegisterFormState extends State<RegisterForm> {
   }
 
   void _register() {
-    // Aquí tu lógica de registro
     if (_passwordController.text == _confirmPasswordController.text) {
-      print(
-          'Registrar con: ${_emailController.text} / ${_passwordController.text}');
+      debugPrint(
+        'Registrar con: ${_emailController.text} / ${_passwordController.text}',
+      );
       Navigator.of(context).pop();
     } else {
-      // Mostrar error o alert
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Las contraseñas no coinciden')),
       );
@@ -271,7 +298,6 @@ class _RegisterFormState extends State<RegisterForm> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      // Por si el teclado tapa
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -311,9 +337,8 @@ class _RegisterFormState extends State<RegisterForm> {
               labelText: 'Confirmar contraseña',
               border: const OutlineInputBorder(),
               suffixIcon: IconButton(
-                icon: Icon(_confirmPasswordVisible
-                    ? Icons.visibility
-                    : Icons.visibility_off),
+                icon: Icon(
+                    _confirmPasswordVisible ? Icons.visibility : Icons.visibility_off),
                 onPressed: () => setState(
                     () => _confirmPasswordVisible = !_confirmPasswordVisible),
               ),
