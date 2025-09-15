@@ -170,16 +170,18 @@ class _LoginFormState extends State<LoginForm> {
         _passwordController.text.trim(),
       );
 
-      debugPrint('Token: ${loginResponse.token}');
-      debugPrint('User: ${loginResponse.user}');
-      debugPrint('Warnings: ${loginResponse.warnings}');
+      //ACTUALIZA LAS VARIABLES DEL NOTIFICATOR DE ACUERDO A LA RESPONSE DEL LOGIN.
+      isLoggedIn.value = true;
+      loginController.value = loginResponse;
 
       if (mounted) {
-        Navigator.pushNamed(context, '/logged', arguments: loginResponse);
+        Navigator.of(context).pop();
       }
+      
     } catch (e) {
+      debugPrint('Error from endpoint --------------------- $e.toString()');
       setState(() {
-        _error = e.toString();
+        _error = "Hubo un error al comunicarse con el servidor";
       });
     } finally {
       if (mounted) {

@@ -1,13 +1,14 @@
 import 'package:dio/dio.dart';
+import 'package:grhsolutions/dio/dio.dart';
 import '../../models/user/login-model.dart';
 
 class LoginService {
-  final Dio _dio = Dio(BaseOptions(baseUrl: 'http://localhost:3000/login'));
-
+  final http = Http();
+  final String baseEndpoint = "/login";
   Future<LoginResponse> login(String email, String password) async {
     try {
-      final response = await _dio.post(
-        '/login',
+      final response = await http.post(
+        '$baseEndpoint/login',
         data: {'email': email, 'password': password},
       );
 
