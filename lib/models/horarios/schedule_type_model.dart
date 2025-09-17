@@ -26,7 +26,7 @@ class ScheduleType {
       endTime: json['endTime'] ?? '',
       createdAt: json['createdAt'] ?? '',
       updatedAt: json['updatedAt'] ?? '',
-v: int.tryParse(json['__v']?.toString() ?? '0') ?? 0, // ✅
+v: int.tryParse(json['__v']?.toString() ?? '0') ?? 0, 
     );
   }
 

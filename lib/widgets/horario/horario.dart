@@ -17,7 +17,7 @@ class _HorarioState extends State<Horario> {
 
   String grupo = '';
   Map<DateTime, String> horarios = {};
-  String horarioGeneral = ''; // Para almacenar el tipo de horario general
+  String horarioGeneral = ''; 
 
   @override
   void initState() {
@@ -41,16 +41,13 @@ class _HorarioState extends State<Horario> {
         print('scheduleType: ${h.scheduleType?.name}');
         print('group: ${h.group?.name}');
 
-        // startDate es String, verificar que no esté vacío
         if (h.startDate.isEmpty) {
           print('❌ Saltando: startDate está vacío');
           continue;
         }
 
-        // Parsear fecha desde String
         DateTime fechaInicio;
         try {
-          // h.startDate ya es String del JSON, parseamos directamente
           fechaInicio = DateTime.parse(h.startDate).toLocal();
           print('✅ Fecha parseada: $fechaInicio');
         } catch (err) {
@@ -58,22 +55,18 @@ class _HorarioState extends State<Horario> {
           continue;
         }
 
-        // Crear clave normalizada (solo fecha, sin hora)
         final key = DateTime(fechaInicio.year, fechaInicio.month, fechaInicio.day);
         print('🔑 Clave generada: $key');
 
-        // Obtener tipo de horario
         String tipo = '';
         if (h.scheduleType?.name != null && h.scheduleType!.name.isNotEmpty) {
           tipo = h.scheduleType!.name;
-          // Guardar como horario general (se sobrescribirá con el último, pero generalmente será el mismo)
           horarioGeneral = tipo;
         }
         print('📅 Tipo horario: "$tipo"');
 
         mapaHorarios[key] = tipo;
 
-        // Obtener nombre del grupo  
         if (h.group?.name != null && h.group!.name.isNotEmpty) {
           nombreGrupo = h.group!.name;
           print('👥 Grupo: $nombreGrupo');
@@ -92,11 +85,11 @@ class _HorarioState extends State<Horario> {
           horarios = mapaHorarios;
           grupo = nombreGrupo;
         });
-        print('✅ Estado actualizado');
-        print('🔄 Horario general para mostrar: "$horarioGeneral"');
+        print(' Estado actualizado');
+        print(' Horario general para mostrar: "$horarioGeneral"');
       }
     } catch (e, st) {
-      print('❌ ERROR GENERAL: $e');
+      print(' ERROR GENERAL: $e');
       print('Stack trace: $st');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -116,7 +109,6 @@ class _HorarioState extends State<Horario> {
       return;
     }
 
-    // Usar la misma normalización que en cargarHorarios
     final claveSeleccionada = DateTime(
       _selectedDay!.year,
       _selectedDay!.month,
@@ -176,14 +168,13 @@ class _HorarioState extends State<Horario> {
               selectedDecoration:
                   BoxDecoration(color: Colors.blue, shape: BoxShape.circle),
             ),
-            rowHeight: 80, // Aumenté un poco más el espacio
+            rowHeight: 80, 
             onDaySelected: (selectedDay, focusedDay) {
               setState(() {
                 _selectedDay = selectedDay;
                 _focusedDay = focusedDay;
               });
               
-              // Debug para verificar selección
               final clave = DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
               print('Día seleccionado: $clave');
               print('Horario: "${horarios[clave]}"');
@@ -219,13 +210,12 @@ class _HorarioState extends State<Horario> {
 
   Widget _buildDayCell(DateTime day,
       {bool isToday = false, bool isSelected = false}) {
-    // Usar la misma normalización
+
     final clave = DateTime(day.year, day.month, day.day);
     
-    // Primero buscar horario específico para este día, si no existe usar el horario general
     String? horario = horarios[clave];
     if (horario == null || horario.isEmpty) {
-      horario = horarioGeneral; // Mostrar horario general en todos los días
+      horario = horarioGeneral; 
     }
     
     return Container(
@@ -253,7 +243,7 @@ class _HorarioState extends State<Horario> {
           ),
           const SizedBox(height: 2),
           Container(
-            height: 16, // Altura fija para el texto del horario
+            height: 16, 
             child: Text(
               horario ?? "",
               style: TextStyle(
