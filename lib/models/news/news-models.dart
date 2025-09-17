@@ -1,61 +1,62 @@
-class User {
-  final String name;
-  final String email;
-
-  User({required this.name, required this.email});
-
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      name: json['name'] ?? '',
-      email: json['email'] ?? '',
-    );
-  }
-}
-
 class News {
   final String id;
   final String title;
   final String description;
-  final DateTime date;
+  final String type;
+  final int numberLikes;
+  final int numberDisLikes;
+  final DateTime createdAt; // 👈 ahora es DateTime
   final User madeBy;
 
   News({
     required this.id,
     required this.title,
     required this.description,
-    required this.date,
+    required this.type,
+    required this.numberLikes,
+    required this.numberDisLikes,
+    required this.createdAt,
     required this.madeBy,
   });
 
   factory News.fromJson(Map<String, dynamic> json) {
     return News(
-      id: json['_id'],
-      title: json['title'],
-      description: json['description'] ?? '',
-      date: DateTime.parse(json['date']),
-      madeBy: User.fromJson(json['madeBy']),
+      id: json["_id"],
+      title: json["title"],
+      description: json["description"] ?? "",
+      type: json["type"],
+      numberLikes: json["numberLikes"] ?? 0,
+      numberDisLikes: json["numberDisLikes"] ?? 0,
+      createdAt: DateTime.parse(json["createdAt"]), // 👈 conversión aquí
+      madeBy: User.fromJson(json["madeBy"]),
+    );
+  }
+}
+
+class User {
+  final String id;
+  final String email;
+
+  User({required this.id, required this.email});
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json["_id"],
+      email: json["email"],
     );
   }
 }
 
 class PaginatedNews {
-  final List<News> items;
-  final int currentPage;
+  final List<News> data;
   final int totalPages;
 
-  PaginatedNews({
-    required this.items,
-    required this.currentPage,
-    required this.totalPages,
-  });
+  PaginatedNews({required this.data, required this.totalPages});
 
   factory PaginatedNews.fromJson(Map<String, dynamic> json) {
     return PaginatedNews(
-      items: (json['items'] as List)
-          .map((item) => News.fromJson(item))
-          .toList(),
-      currentPage: json['currentPage'],
-      totalPages: json['totalPages'],
+      data: (json["data"] as List).map((e) => News.fromJson(e)).toList(),
+      totalPages: json["totalPages"],
     );
   }
 }
