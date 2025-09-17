@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:grhsolutions/widgets/vacants/myVacanst.dart';
+import 'package:grhsolutions/widgets/vacants/openVacants.dart';
 
 class Vacant extends StatefulWidget {
   const Vacant({Key? key}) : super(key: key);
@@ -10,20 +12,34 @@ class Vacant extends StatefulWidget {
 class _VacantState extends State<Vacant> {
   final TextEditingController _controller = TextEditingController();
   bool _isRemote = false;
+
   void _myVacants() {
-    Navigator.pushNamed(context, '/my_vacants');
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const myVacant()),
+    );
+  }
+
+  void _searchVacants() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => OpenVacants(
+          name: _controller.text,
+          isRemote: _isRemote,
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 50),
           child: Column(
             children: [
-              // Parte superior: búsqueda
               Expanded(
                 child: Column(
                   children: [
@@ -41,15 +57,16 @@ class _VacantState extends State<Vacant> {
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
+                              color: Color.fromARGB(255, 0, 0, 0),
                             ),
                           ),
                           const SizedBox(height: 15),
 
-                          // Campo de texto
+                          // Input de búsqueda
                           TextField(
                             controller: _controller,
                             decoration: InputDecoration(
-                              hintText: 'Progamador mobil',
+                              hintText: 'Programador móvil',
                               suffixIcon: IconButton(
                                 icon: const Icon(Icons.clear),
                                 onPressed: () {
@@ -57,7 +74,6 @@ class _VacantState extends State<Vacant> {
                                 },
                               ),
                               filled: true,
-                              fillColor: Colors.white,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(30),
                                 borderSide: BorderSide.none,
@@ -66,7 +82,7 @@ class _VacantState extends State<Vacant> {
                           ),
                           const SizedBox(height: 15),
 
-                          // Switch
+                          // Switch remoto
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -90,23 +106,19 @@ class _VacantState extends State<Vacant> {
 
                           const SizedBox(height: 10),
 
-                          // Botón de búsqueda
+                          // Botón buscar
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton.icon(
-                              onPressed: () {
-                                // lógica de búsqueda aquí
-                              },
+                              onPressed: _searchVacants,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.black,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 15),
+                                padding: const EdgeInsets.symmetric(vertical: 15),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                               ),
-                              icon:
-                                  const Icon(Icons.search, color: Colors.white),
+                              icon: const Icon(Icons.search, color: Colors.white),
                               label: const Text(
                                 'BUSCAR',
                                 style: TextStyle(color: Colors.white),
@@ -120,7 +132,9 @@ class _VacantState extends State<Vacant> {
                 ),
               ),
 
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
+
+              // Botón ver postulaciones
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(

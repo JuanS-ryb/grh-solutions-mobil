@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:grhsolutions/widgets/vacants/buildStatusCircle.dart';
+import 'package:grhsolutions/widgets/vacants/viewVacants.dart';
+import '../base_scaffold.dart';
 
 class myVacant extends StatefulWidget {
   const myVacant({Key? key}) : super(key: key);
@@ -8,112 +11,161 @@ class myVacant extends StatefulWidget {
 }
 
 class _myVacantState extends State<myVacant> {
-  final TextEditingController _controller = TextEditingController();
-  bool _isRemote = false;
+  int _selectedTab = 0;
+
+  final List<String> tabs = ["TODAS", "APROBADOS", "PROCESOS", "RECHAZADOS"];
+
+  final List<Map<String, dynamic>> vacants = [
+    {
+      "title": "Se necesita programador.",
+      "desc": "Se necesita un programador que coopere p...",
+      "date": "15/01/2025",
+      "status": "aprobado",
+      "id": "1"
+    },
+    {
+      "title": "Se necesita programador.",
+      "desc": "Se necesita un programador que coopere p...",
+      "date": "15/01/2025",
+      "status": "proceso",
+      "id": "2"
+    },
+    {
+      "title": "Se necesita acceador.",
+      "desc": "Se necesita un acceador que coopere p...",
+      "date": "15/01/2025",
+      "status": "rechazado",
+      "id": "3"
+    },
+    {
+      "title": "Se necesita asistente.",
+      "desc": "Se necesita un asistente que coopere p...",
+      "date": "15/01/2025",
+      "status": "aprobado",
+      "id": "4"
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
+    return BaseScaffold(
+      appBar: AppBar(
+        leading: const BackButton(),
+        elevation: 0,
+        title: const Text("Mis vacantes", style: TextStyle()),
+        centerTitle: true,
+      ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 50),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Parte superior: búsqueda
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: List.generate(tabs.length, (index) {
+                    final isSelected = _selectedTab == index;
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedTab = index;
+                        });
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 5),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: isSelected ? Colors.blue : Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          tabs[index],
+                          style: TextStyle(
+                            color: isSelected ? Colors.white : Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Lista de vacantes
               Expanded(
-                child: Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      margin: const EdgeInsets.symmetric(vertical: 50),
+                child: ListView.builder(
+                  itemCount: vacants.length,
+                  itemBuilder: (context, index) {
+                    final item = vacants[index];
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: Colors.purple.shade50,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Column(
+                      child: Row(
                         children: [
-                          const Text(
-                            'Busca lo que te interesa!',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                          // Status
+                          buildStatusCircle(item["status"]!),
+                          // Info
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item["title"]!,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  item["desc"]!,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  "Disponible hasta: ${item["date"]}",
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(height: 15),
 
-                          // Campo de texto
-                          TextField(
-                            controller: _controller,
-                            decoration: InputDecoration(
-                              hintText: 'Progamador mobil',
-                              suffixIcon: IconButton(
-                                icon: const Icon(Icons.clear),
-                                onPressed: () {
-                                  _controller.clear();
-                                },
-                              ),
-                              filled: true,
-                              fillColor: Colors.white,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(30),
-                                borderSide: BorderSide.none,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 15),
-
-                          // Switch
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Switch(
-                                value: _isRemote,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _isRemote = value;
-                                  });
-                                },
-                                activeColor: Colors.purple,
-                              ),
-                              const Text(
-                                'Buscar remoto?',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
+                          // Botón VER
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ViewVacants(
+                                    id: item["id"] ??
+                                        "1", // le pasas un string seguro, nunca null
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 10),
-
-                          // Botón de búsqueda
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: () {
-                                // lógica de búsqueda aquí
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.black,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 15),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                              icon:
-                                  const Icon(Icons.search, color: Colors.white),
-                              label: const Text(
-                                'BUSCAR',
-                                style: TextStyle(color: Colors.white),
+                              );
+                            },
+                            child: const Text(
+                              "VER",
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
+                    );
+                  },
                 ),
               ),
             ],
