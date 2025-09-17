@@ -1,19 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:grhsolutions/widgets/request/request.dart';
 import 'widgets/comunicados/comunicados.dart';
 import 'widgets/horario/horario.dart';
 import 'widgets/login/login.dart';
-import 'data/notifiers.dart'; // donde tienes renderNotificator, isLoggedIn y useDarkTheme
+import 'data/notifiers.dart'; // renderNotificator, isLoggedIn, useDarkTheme
 import 'theme/custom-themes.dart';
+import 'domain/dio.dart';
+import 'widgets/vacants/vacants.dart';
 
-void main() => runApp(const MyApp());
+final api = ApiService(baseUrl: "http://localhost:3000");
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('es_ES', null); // <-- inicializa locale
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Usamos ValueListenableBuilder para escuchar useDarkTheme
     return ValueListenableBuilder<bool>(
       valueListenable: useDarkTheme,
       builder: (context, isDarkMode, _) {
@@ -25,16 +33,15 @@ class MyApp extends StatelessWidget {
           home: ValueListenableBuilder<bool>(
             valueListenable: isLoggedIn,
             builder: (context, loggedIn, _) {
-              if (!loggedIn) {
-                return const Login();
-              }
+              if (!loggedIn) return const Login();
+
               return ValueListenableBuilder<int>(
                 valueListenable: renderNotificator,
                 builder: (context, selectedIndex, _) {
                   final List<Widget> widgetOptions = [
                     const Comunicados(),
                     const Request(),
-                    const Center(child: Text("Vacantes")),
+                    const Vacant(),
                     const Horario(),
                     const Center(child: Text("Perfil")),
                   ];
@@ -46,7 +53,7 @@ class MyApp extends StatelessWidget {
                       showUnselectedLabels: false,
                       type: BottomNavigationBarType.fixed,
                       iconSize: 20,
-                      items: const <BottomNavigationBarItem>[
+                      items: const [
                         BottomNavigationBarItem(
                           icon: Icon(Icons.home),
                           label: 'Home',

@@ -4,3 +4,8 @@
 /ios
 pubspec.lock
 /android/app/src/main/java/io/flutter/plugins
+/.idea
+/android
+/ios
+/ios
+ios/Flutter/flutter_export_environment.sh
