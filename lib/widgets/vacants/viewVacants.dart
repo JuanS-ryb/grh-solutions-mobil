@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../base_scaffold.dart';
+import 'package:grhsolutions/models/vacants/get-model.dart';
+import 'package:grhsolutions/services/vacants/get-vacant-id.dart';
 
 class ViewVacants extends StatefulWidget {
   final String id;
@@ -11,52 +13,51 @@ class ViewVacants extends StatefulWidget {
 }
 
 class _ViewVacantsState extends State<ViewVacants> {
-  // Lista simulada de vacantes
-  final List<Map<String, dynamic>> vacants = [
-    {
-      "id": "1",
-      "title": "Se necesita programador.",
-      "desc": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas fringilla...",
-      "salary": "2.500.000",
-      "date": "15/01/2025",
-      "remote": true,
-    },
-    {
-      "id": "2",
-      "title": "Se necesita acceador.",
-      "desc": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum ante ipsum primis...",
-      "salary": "2.000.000",
-      "date": "15/01/2025",
-      "remote": false,
-    },
-    {
-      "id": "3",
-      "title": "Se necesita asistente.",
-      "desc": "Donec eu blandit dolor, id pulvinar erat. Class aptent taciti sociosqu ad litora torquent...",
-      "salary": "1.800.000",
-      "date": "15/01/2025",
-      "remote": true,
-    },
-  ];
-
-  Map<String, dynamic>? selectedVacant;
+  Vacants? selectedVacant;
+  bool isLoading = true;
+  String? errorMessage;
 
   @override
   void initState() {
     super.initState();
-    selectedVacant =
-        vacants.firstWhere((vac) => vac["id"] == widget.id, orElse: () => {});
+    _loadVacant();
+  }
+
+  Future<void> _loadVacant() async {
+    final service = GetVacantIdService();
+    try {
+      final vacant = await service.getVacantById(widget.id);
+      setState(() {
+        selectedVacant = vacant;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = e.toString();
+        isLoading = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (selectedVacant == null || selectedVacant!.isEmpty) {
+    if (isLoading) {
+      return BaseScaffold(
+        appBar: AppBar(
+          leading: const BackButton(),
+          title: Text("Detalle de vacante"),
+        ),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (errorMessage != null || selectedVacant == null) {
       return BaseScaffold(
         appBar: AppBar(
           leading: const BackButton(),
           title: const Text("Detalle de vacante"),
         ),
-        body: const Center(child: Text("Vacante no encontrada")),
+        body: Center(child: Text(errorMessage ?? "Vacante no encontrada")),
       );
     }
 
@@ -65,7 +66,7 @@ class _ViewVacantsState extends State<ViewVacants> {
         leading: const BackButton(),
         elevation: 0,
         title: Text(
-          selectedVacant!["title"],
+          selectedVacant!.tittle,
           style: const TextStyle(),
         ),
         centerTitle: true,
@@ -78,7 +79,7 @@ class _ViewVacantsState extends State<ViewVacants> {
             Expanded(
               child: SingleChildScrollView(
                 child: Text(
-                  selectedVacant!["desc"],
+                  selectedVacant!.description,
                   style: const TextStyle(fontSize: 14, color: Colors.black87),
                 ),
               ),
@@ -95,20 +96,23 @@ class _ViewVacantsState extends State<ViewVacants> {
                 children: [
                   ListTile(
                     leading: const Icon(Icons.star_border),
-                    title: const Text("Salario"),
-                    subtitle: Text(selectedVacant!["salary"]),
+                    title: const Text("Salario",
+                    style: TextStyle(fontSize: 14, color: Colors.black87),),
+                    subtitle: Text(selectedVacant!.salary),
                   ),
                   const Divider(height: 1),
                   ListTile(
                     leading: const Icon(Icons.calendar_today),
-                    title: const Text("Fecha de vencimiento"),
-                    subtitle: Text(selectedVacant!["date"]),
+                    title: const Text("Fecha de publicación",
+                    style: TextStyle(fontSize: 14, color: Colors.black87),
+                    ),
+                    subtitle: Text(selectedVacant!.createdAt),
                   ),
                   const Divider(height: 1),
                   ListTile(
                     leading: const Icon(Icons.work_outline),
-                    title: const Text("Es remoto?"),
-                    subtitle: Text(selectedVacant!["remote"] ? "SI" : "NO"),
+                    title: const Text("Modalidad", style: TextStyle(fontSize: 14, color: Colors.black87),),
+                    subtitle: Text(selectedVacant!.typeModality),
                   ),
                 ],
               ),

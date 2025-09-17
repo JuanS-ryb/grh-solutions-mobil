@@ -1,58 +1,81 @@
 import 'package:flutter/material.dart';
 import 'package:grhsolutions/widgets/vacants/viewVacants.dart';
+import 'package:grhsolutions/services/vacants/get-vacants.dart';
+import 'package:grhsolutions/models/vacants/get-model.dart';
 import '../base_scaffold.dart';
 
 class OpenVacants extends StatefulWidget {
   final String name;
   final bool isRemote;
 
-  const OpenVacants({Key? key, required this.name , required this.isRemote}) : super(key: key);
+  const OpenVacants({Key? key, required this.name, required this.isRemote})
+      : super(key: key);
 
   @override
   State<OpenVacants> createState() => _OpenVacantsState();
 }
 
 class _OpenVacantsState extends State<OpenVacants> {
-  final List<Map<String, dynamic>> vacants = [
-    {
-      "title": "Se necesita aceador.",
-      "desc": "Se necesita un aceador que coopere p...",
-      "date": "15/01/2025",
-      "status": "aprobado",
-      "id": "1"
-    },
-    {
-      "title": "Se necesita programador.",
-      "desc": "Se necesita un programador que coopere p...",
-      "date": "15/01/2025",
-      "status": "proceso",
-      "id": "2"
-    },
-    {
-      "title": "Se necesita ingeniero en sistemas.",
-      "desc": "Se necesita un ingeniero con experiencia...",
-      "date": "15/01/2025",
-      "status": "aprobado",
-      "id": "3"
-    },
-    {
-      "title": "Se necesita diseñador.",
-      "desc": "Se necesita un diseñador que coopere p...",
-      "date": "15/01/2025",
-      "status": "rechazado",
-      "id": "4"
-    },
-  ];
+  final GetVacantsService _service = GetVacantsService();
+
+  List<Vacants> vacants = [];
+  bool isLoading = true;
+  String? errorMsg;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadVacants();
+  }
+
+  Future<void> _loadVacants() async {
+    try {
+      final response = await _service.getVacants();
+      setState(() {
+        vacants = response.vacants;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        errorMsg = e.toString();
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (errorMsg != null) {
+      return BaseScaffold(
+        appBar: AppBar(
+          leading: const BackButton(),
+          title: const Text("Vacantes"),
+        ),
+        body: Center(child: Text("Error: $errorMsg")),
+      );
+    }
+
+    if (vacants.isEmpty) {
+      return BaseScaffold(
+        appBar: AppBar(
+          leading: const BackButton(),
+          title: const Text("Vacantes"),
+        ),
+        body: const Center(child: Text("No hay vacantes disponibles")),
+      );
+    }
+
     return BaseScaffold(
       appBar: AppBar(
         leading: const BackButton(),
         elevation: 0,
-        title: Text(
-          "Vacantes: " + widget.name, 
-        ),
+        title: Text("Vacantes: ${widget.name}"),
         centerTitle: true,
       ),
       body: Padding(
@@ -76,23 +99,28 @@ class _OpenVacantsState extends State<OpenVacants> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          item["title"]!,
+                          item.tittle,
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
+                            color: Colors.black,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          item["desc"]!,
+                          item.description,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          "Disponible hasta: ${item["date"]}",
+                          "Disponible desde: ${item.createdAt}",
                           style: const TextStyle(
                             fontSize: 12,
                             color: Colors.grey,
@@ -108,9 +136,7 @@ class _OpenVacantsState extends State<OpenVacants> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ViewVacants(
-                            id: item["id"] ?? "1",
-                          ),
+                          builder: (context) => ViewVacants(id: item.id),
                         ),
                       );
                     },

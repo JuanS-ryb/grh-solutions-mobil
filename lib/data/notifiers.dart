@@ -8,4 +8,4 @@ ValueNotifier<int> renderNotificator = ValueNotifier(0);
 ValueNotifier<bool> isLoggedIn = ValueNotifier(false);
 
 // controlador de login
-ValueNotifier<LoginResponse?> loginController = ValueNotifier<LoginResponse?>(null);
+ValueNotifier<AuthResponse?> loginController = ValueNotifier<AuthResponse?>(null);

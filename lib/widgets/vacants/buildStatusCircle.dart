@@ -5,11 +5,11 @@ Widget buildStatusCircle(String status) {
   Color color = Colors.grey;
 
   switch (status) {
-    case "aprobado":
+    case "contratado":
       progress = 1.0; // círculo lleno
       color = Colors.green;
       break;
-    case "proceso":
+    case "pendiente":
       progress = 0.5; // mitad del círculo
       color = Colors.blue;
       break;
