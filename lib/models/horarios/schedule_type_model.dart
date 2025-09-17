@@ -3,8 +3,9 @@ class ScheduleType {
   final String name;
   final String startTime;
   final String endTime;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final String createdAt;
+  final String updatedAt;
+  final int v;
 
   ScheduleType({
     required this.id,
@@ -13,16 +14,19 @@ class ScheduleType {
     required this.endTime,
     required this.createdAt,
     required this.updatedAt,
+    required this.v,
   });
 
   factory ScheduleType.fromJson(Map<String, dynamic> json) {
+     print('ScheduleType JSON: $json');
     return ScheduleType(
-      id: json['_id'],
-      name: json['name'],
-      startTime: json['startTime'],
-      endTime: json['endTime'],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      id: json['_id'] ?? '',
+      name: json['name'] ?? '',
+      startTime: json['startTime'] ?? '',
+      endTime: json['endTime'] ?? '',
+      createdAt: json['createdAt'] ?? '',
+      updatedAt: json['updatedAt'] ?? '',
+v: int.tryParse(json['__v']?.toString() ?? '0') ?? 0, // ✅
     );
   }
 
@@ -31,7 +35,8 @@ class ScheduleType {
         'name': name,
         'startTime': startTime,
         'endTime': endTime,
-        'createdAt': createdAt.toIso8601String(),
-        'updatedAt': updatedAt.toIso8601String(),
+        'createdAt': createdAt,
+        'updatedAt': updatedAt,
+        '__v': v,
       };
 }

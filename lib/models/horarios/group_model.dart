@@ -1,28 +1,32 @@
-class Group {
+class ScheduleGroup {
   final String id;
   final String name;
   final List<String> users;
   final String area;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final String createdAt;
+  final String updatedAt;
+  final int v;
 
-  Group({
+  ScheduleGroup({
     required this.id,
     required this.name,
     required this.users,
     required this.area,
     required this.createdAt,
     required this.updatedAt,
+    required this.v,
   });
 
-  factory Group.fromJson(Map<String, dynamic> json) {
-    return Group(
-      id: json['_id'],
-      name: json['name'],
-      users: List<String>.from(json['users'] ?? []),
-      area: json['area'],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+  factory ScheduleGroup.fromJson(Map<String, dynamic> json) {
+     print('ScheduleGroup JSON: $json');
+    return ScheduleGroup(
+      id: json['_id'] ?? '',
+      name: json['name'] ?? '',
+      users: (json['users'] as List?)?.map((e) => e.toString()).toList() ?? [],
+      area: json['area'] ?? '',
+      createdAt: json['createdAt'] ?? '',
+      updatedAt: json['updatedAt'] ?? '',
+v: int.tryParse(json['__v']?.toString() ?? '0') ?? 0, // ✅
     );
   }
 
@@ -31,7 +35,8 @@ class Group {
         'name': name,
         'users': users,
         'area': area,
-        'createdAt': createdAt.toIso8601String(),
-        'updatedAt': updatedAt.toIso8601String(),
+        'createdAt': createdAt,
+        'updatedAt': updatedAt,
+        '__v': v,
       };
 }

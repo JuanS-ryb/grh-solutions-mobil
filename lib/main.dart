@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:grhsolutions/widgets/request/request.dart';
 import 'widgets/comunicados/comunicados.dart';
 import 'widgets/horario/horario.dart';
 import 'widgets/login/login.dart';
-import 'package:intl/date_symbol_data_local.dart';
-import 'data/notifiers.dart'; // donde tienes renderNotificator, isLoggedIn y useDarkTheme
-import 'data/notifiers.dart';
+import 'data/notifiers.dart'; // renderNotificator, isLoggedIn, useDarkTheme
 import 'theme/custom-themes.dart';
 import 'domain/dio.dart';
 import 'widgets/vacants/vacants.dart';
-final api=ApiService(baseUrl: "http://localhost:3000");
 
+final api = ApiService(baseUrl: "http://localhost:3000");
 
-void main() => runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('es_ES', null); // <-- inicializa locale
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -30,9 +33,8 @@ class MyApp extends StatelessWidget {
           home: ValueListenableBuilder<bool>(
             valueListenable: isLoggedIn,
             builder: (context, loggedIn, _) {
-              if (!loggedIn) {
-                return const Login();
-              }
+              if (!loggedIn) return const Login();
+
               return ValueListenableBuilder<int>(
                 valueListenable: renderNotificator,
                 builder: (context, selectedIndex, _) {
@@ -51,7 +53,7 @@ class MyApp extends StatelessWidget {
                       showUnselectedLabels: false,
                       type: BottomNavigationBarType.fixed,
                       iconSize: 20,
-                      items: const <BottomNavigationBarItem>[
+                      items: const [
                         BottomNavigationBarItem(
                           icon: Icon(Icons.home),
                           label: 'Home',
