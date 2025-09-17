@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 class Horario extends StatefulWidget {
@@ -6,6 +7,7 @@ class Horario extends StatefulWidget {
   @override
   State<Horario> createState() => _HorarioState();
 }
+
 
 class _HorarioState extends State<Horario> {
   @override

@@ -3,11 +3,12 @@ import 'package:grhsolutions/widgets/request/request.dart';
 import 'widgets/comunicados/comunicados.dart';
 import 'widgets/horario/horario.dart';
 import 'widgets/login/login.dart';
-import 'data/notifiers.dart'; // donde tienes renderNotificator, isLoggedIn y useDarkTheme
+import 'data/notifiers.dart';
 import 'theme/custom-themes.dart';
+import 'domain/dio.dart';
 import 'widgets/vacants/vacants.dart';
-import 'widgets/vacants/myVacanst.dart';
-import 'widgets/vacants/viewVacants.dart';
+final api=ApiService(baseUrl: "http://localhost:3000");
+
 
 void main() => runApp(const MyApp());
 
@@ -16,7 +17,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Usamos ValueListenableBuilder para escuchar useDarkTheme
     return ValueListenableBuilder<bool>(
       valueListenable: useDarkTheme,
       builder: (context, isDarkMode, _) {
