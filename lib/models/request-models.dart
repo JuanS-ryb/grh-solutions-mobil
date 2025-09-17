@@ -1,25 +1,31 @@
 class RequestItem {
   final String id;
-  final String estado;
-  final String titulo;
+  final String title;
+  final String status;
+  final String typeRequest;
+  final String? infoDx;
   final DateTime createdAt;
   final DateTime updatedAt;
 
   RequestItem({
     required this.id,
-    required this.estado,
-    required this.titulo,
+    required this.title,
+    required this.status,
+    required this.typeRequest,
+    this.infoDx,
     required this.createdAt,
     required this.updatedAt,
   });
 
   factory RequestItem.fromJson(Map<String, dynamic> json) {
     return RequestItem(
-      id: json['id'].toString(),
-      estado: json['estado'] ?? '',
-      titulo: json['titulo'] ?? '',
-      createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
-      updatedAt: DateTime.tryParse(json['updatedAt'] ?? '') ?? DateTime.now(),
+      id: json['_id'] ?? '',
+      title: json['title'] ?? '',
+      status: json['status'] ?? '',
+      typeRequest: json['type_request'] ?? '',
+      infoDx: json['infoDx'],
+      createdAt: DateTime.parse(json['createdAt']),
+      updatedAt: DateTime.parse(json['updatedAt']),
     );
   }
 }

@@ -23,17 +23,19 @@ class RequestEdit extends StatefulWidget {
 class _RequestEditState extends State<RequestEdit> {
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
-  String? _selectedType;
-  DateTime? _fromDate;
-  DateTime? _toDate;
+  late String? _selectedType;
+  late DateTime? _fromDate;
+  late DateTime? _toDate;
+
+  final List<String> _typeOptions = ["prestamo", "reclamo", "otro"];
 
   @override
   void initState() {
     super.initState();
-    // Inicializamos los controladores con los valores recibidos
     _titleController = TextEditingController(text: widget.title);
     _descriptionController = TextEditingController(text: widget.description);
-    _selectedType = widget.type;
+    // Si el valor recibido no está en las opciones, lo dejamos en null para no romper el dropdown
+    _selectedType = _typeOptions.contains(widget.type) ? widget.type : null;
     _fromDate = widget.fromDate;
     _toDate = widget.toDate;
   }
@@ -66,7 +68,6 @@ class _RequestEditState extends State<RequestEdit> {
         ),
         centerTitle: true,
       ),
-
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -99,25 +100,23 @@ class _RequestEditState extends State<RequestEdit> {
                           decoration: const InputDecoration(
                             labelText: "Tipo:",
                           ),
-                          items: const [
-                            DropdownMenuItem(
-                              value: "prestamo",
-                              child: Text("Préstamo"),
-                            ),
-                            DropdownMenuItem(
-                              value: "reclamo",
-                              child: Text("Reclamo"),
-                            ),
-                            DropdownMenuItem(
-                              value: "otro",
-                              child: Text("Otro"),
-                            ),
-                          ],
+                          items: _typeOptions
+                              .map((e) => DropdownMenuItem(
+                                    value: e,
+                                    child: Text(
+                                      e[0].toUpperCase() + e.substring(1),
+                                    ),
+                                  ))
+                              .toList(),
                           onChanged: (value) {
                             setState(() {
                               _selectedType = value;
                             });
                           },
+                          // Si el valor no existe, muestra un hint
+                          hint: widget.type.isNotEmpty
+                              ? Text(widget.type)
+                              : const Text("Selecciona un tipo"),
                         ),
                         const SizedBox(height: 16),
 
@@ -153,12 +152,12 @@ class _RequestEditState extends State<RequestEdit> {
               ),
             ),
 
-            // Botón Aplicar
+            // Botón Aplicar (solo regresa a la vista)
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.pop(context); // vuelve a la vista de detalles
+                  Navigator.pop(context);
                 },
                 child: const Text("Aplicar"),
               ),

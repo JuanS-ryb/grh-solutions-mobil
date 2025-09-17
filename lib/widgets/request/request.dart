@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../services/request-services.dart';
 import '../../models/request-models.dart';
 import 'request_created.dart';
@@ -13,12 +14,17 @@ class Request extends StatefulWidget {
 
 class _RequestState extends State<Request> {
   late Future<List<RequestItem>> futureRequests;
-  final RequestService _requestService = RequestService();
+  final RequestService _requestService = RequestService(); // Ya no se pasa token
 
   @override
   void initState() {
     super.initState();
     futureRequests = _requestService.getRequests();
+  }
+
+  // 🔹 Función para formatear fechas legibles
+  String formatDate(DateTime date) {
+    return DateFormat("dd MMM yyyy, hh:mm a").format(date);
   }
 
   @override
@@ -71,7 +77,7 @@ class _RequestState extends State<Request> {
 
                       // Definir color según estado
                       Color color;
-                      switch (req.estado.toLowerCase()) {
+                      switch (req.status.toLowerCase()) {
                         case "aprobada":
                           color = Colors.greenAccent;
                           break;
@@ -83,14 +89,15 @@ class _RequestState extends State<Request> {
                       }
 
                       return InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const RequestView(),
-                            ),
-                          );
-                        },
+onTap: () {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => RequestView(request: req),
+    ),
+  );
+},
+
                         child: Card(
                           margin: const EdgeInsets.symmetric(vertical: 8),
                           shape: RoundedRectangleBorder(
@@ -123,7 +130,7 @@ class _RequestState extends State<Request> {
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 10, vertical: 6),
                                       child: Text(
-                                        req.estado,
+                                        req.status,
                                         style: theme.textTheme.bodyMedium
                                             ?.copyWith(
                                           fontWeight: FontWeight.bold,
@@ -148,7 +155,7 @@ class _RequestState extends State<Request> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            req.titulo,
+                                            req.title,
                                             style: theme
                                                 .textTheme.bodyMedium
                                                 ?.copyWith(
@@ -158,7 +165,7 @@ class _RequestState extends State<Request> {
                                           ),
                                           const SizedBox(height: 8),
                                           Text(
-                                            req.createdAt.toString(),
+                                            formatDate(req.createdAt),
                                             style: theme.textTheme.bodySmall
                                                 ?.copyWith(
                                               fontSize: 13,
@@ -181,7 +188,7 @@ class _RequestState extends State<Request> {
                                         ),
                                         const SizedBox(height: 8),
                                         Text(
-                                          req.updatedAt.toString(),
+                                          formatDate(req.updatedAt),
                                           style: theme.textTheme.bodySmall
                                               ?.copyWith(
                                             fontSize: 13,

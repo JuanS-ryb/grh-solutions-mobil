@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import '../../models/request-models.dart';
 import 'historial_view.dart';
 import 'asignados_view.dart';
 import 'seguimientos_view.dart';
 import 'request_edit.dart';
 
 class RequestView extends StatefulWidget {
-  const RequestView({Key? key}) : super(key: key);
+  final RequestItem request; // 🔹 Recibe la solicitud
+
+  const RequestView({Key? key, required this.request}) : super(key: key);
 
   @override
   State<RequestView> createState() => _RequestViewState();
@@ -13,6 +17,11 @@ class RequestView extends StatefulWidget {
 
 class _RequestViewState extends State<RequestView> {
   String selectedTab = "DETALLES"; // pestaña activa por defecto
+
+  // 🔹 Función para formatear fechas
+  String formatDate(DateTime date) {
+    return DateFormat("dd MMM yyyy, hh:mm a").format(date);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,24 +57,24 @@ class _RequestViewState extends State<RequestView> {
                 });
               },
               style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.resolveWith((states) {
-                  if (states.contains(WidgetState.selected)) {
+                backgroundColor: MaterialStateProperty.resolveWith((states) {
+                  if (states.contains(MaterialState.selected)) {
                     return theme.colorScheme.primary;
                   }
                   return theme.colorScheme.primary.withOpacity(0.1);
                 }),
-                foregroundColor: WidgetStateProperty.resolveWith((states) {
-                  if (states.contains(WidgetState.selected)) {
+                foregroundColor: MaterialStateProperty.resolveWith((states) {
+                  if (states.contains(MaterialState.selected)) {
                     return theme.colorScheme.onPrimary;
                   }
                   return theme.colorScheme.primary;
                 }),
-                shape: WidgetStateProperty.all(
+                shape: MaterialStateProperty.all(
                   RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
-                padding: WidgetStateProperty.all(
+                padding: MaterialStateProperty.all(
                   const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 ),
               ),
@@ -89,19 +98,33 @@ class _RequestViewState extends State<RequestView> {
           ],
         ),
       ),
-      floatingActionButton: const EditRequestButton(),
+      floatingActionButton: EditRequestButton(request: widget.request),
     );
   }
 
   Widget _buildContent(ThemeData theme) {
+    final req = widget.request;
+
     switch (selectedTab) {
       case "DETALLES":
+        Color statusColor;
+        switch (req.status.toLowerCase()) {
+          case "aprobada":
+            statusColor = Colors.green.shade100;
+            break;
+          case "rechazada":
+            statusColor = Colors.red.shade100;
+            break;
+          default:
+            statusColor = Colors.grey.shade200;
+        }
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildDetailRow("Radicado:", "SOL-20250313", theme),
+            _buildDetailRow("Radicado:", req.id, theme),
             Divider(color: theme.dividerColor),
-            _buildDetailRow("Titulo:", "Solicitud urgente.", theme),
+            _buildDetailRow("Titulo:", req.title ?? "Sin título", theme),
             const SizedBox(height: 12),
             Row(
               children: [
@@ -110,16 +133,16 @@ class _RequestViewState extends State<RequestView> {
                   style: theme.textTheme.bodyMedium
                       ?.copyWith(fontWeight: FontWeight.bold),
                 ),
-                const Spacer(), // 🔹 Esto empuja el estado al extremo derecho
+                const Spacer(),
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.green.shade100, // estado aprobado
+                    color: statusColor,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   child: Text(
-                    "Aprobada",
+                    req.status,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: theme.colorScheme.onPrimary,
@@ -129,11 +152,12 @@ class _RequestViewState extends State<RequestView> {
               ],
             ),
             const SizedBox(height: 12),
-            _buildDetailRow("Tipo:", "Prestamo.", theme),
+            _buildDetailRow(
+                "Tipo:", req.typeRequest ?? "otro", theme), // valor por defecto
             const SizedBox(height: 12),
-            _buildDetailRow("Desde:", "3/31/23 2:52 PM", theme),
+            _buildDetailRow("Desde:", formatDate(req.createdAt), theme),
             const SizedBox(height: 12),
-            _buildDetailRow("Hasta:", "09/10/24 10:45 AM", theme),
+            _buildDetailRow("Hasta:", formatDate(req.updatedAt), theme),
             const SizedBox(height: 12),
             Text(
               "Descripcion:",
@@ -141,7 +165,7 @@ class _RequestViewState extends State<RequestView> {
                   ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 6),
-            Text("Descripcion generica", style: theme.textTheme.bodyMedium),
+            Text(req.infoDx ?? "-", style: theme.textTheme.bodyMedium),
           ],
         );
 
@@ -173,7 +197,8 @@ class _RequestViewState extends State<RequestView> {
 }
 
 class EditRequestButton extends StatelessWidget {
-  const EditRequestButton({super.key});
+  final RequestItem request;
+  const EditRequestButton({super.key, required this.request});
 
   @override
   Widget build(BuildContext context) {
@@ -186,11 +211,11 @@ class EditRequestButton extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (context) => RequestEdit(
-              title: "Solicitud urgente.",
-              description: "Descripcion generica",
-              type: "prestamo",
-              fromDate: DateTime(2023, 3, 31, 14, 52),
-              toDate: DateTime(2024, 9, 10, 10, 45),
+              title: request.title ?? "Sin título",
+              description: request.infoDx ?? "Sin descripción",
+              type: request.typeRequest ?? "otro",
+              fromDate: request.createdAt,
+              toDate: request.updatedAt,
             ),
           ),
         );
