@@ -1,29 +1,55 @@
-class LoginResponse {
+class AuthResponse {
+  final User user;
   final String token;
-  final Map<String, dynamic> user;
-  final Map<String, dynamic>? warnings;
 
-  LoginResponse({
-    required this.token,
+  AuthResponse({
     required this.user,
-    this.warnings,
+    required this.token,
   });
 
-  factory LoginResponse.fromJson(Map<String, dynamic> json) {
-    return LoginResponse(
-      token: json['token'] ?? '',
-      user: Map<String, dynamic>.from(json['user'] ?? {}),
-      warnings: json['warnings'] != null
-          ? Map<String, dynamic>.from(json['warnings'])
-          : null,
+  factory AuthResponse.fromJson(Map<String, dynamic> json) {
+    return AuthResponse(
+      user: User.fromJson(json['user']),
+      token: json['token'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'token': token,
-      'user': user,
-      if (warnings != null) 'warnings': warnings,
+      "user": user.toJson(),
+      "token": token,
+    };
+  }
+}
+
+class User {
+  final String id;
+  final String email;
+  final String rol;
+  final String profile;
+
+  User({
+    required this.id,
+    required this.email,
+    required this.rol,
+    required this.profile,
+  });
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['id'],
+      email: json['email'],
+      rol: json['rol'],
+      profile: json['profile'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "id": id,
+      "email": email,
+      "rol": rol,
+      "profile": profile,
     };
   }
 }
