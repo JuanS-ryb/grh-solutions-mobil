@@ -9,7 +9,8 @@ class MainLayout extends StatelessWidget {
     '/horarios',
     '/profile',
     '/vacantes',
-    '/solicitud'
+    '/solicitud',
+    '/contratos'
   ];
 
   int getSelectedIndex(BuildContext context) {
@@ -39,6 +40,7 @@ class MainLayout extends StatelessWidget {
           NavigationDestination(icon: Icon(Icons.info), label: 'Solicitudes'),
           NavigationDestination(icon: Icon(Icons.add), label: 'Messages'),
           NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
+          NavigationDestination(icon: Icon(Icons.person), label: 'contratos'),
         ],
       ),
       body: child,
