@@ -8,14 +8,11 @@ import 'data/notifiers.dart'; // donde tienes renderNotificator, isLoggedIn y us
 import 'data/notifiers.dart';
 import 'theme/custom-themes.dart';
 import 'domain/dio.dart';
-
+import 'widgets/vacants/vacants.dart';
 final api=ApiService(baseUrl: "http://localhost:3000");
 
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await initializeDateFormatting('es_ES', null); 
-  runApp(const MyApp());
-}
+
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -42,7 +39,7 @@ class MyApp extends StatelessWidget {
                   final List<Widget> widgetOptions = [
                     const Comunicados(),
                     const Request(),
-                    const Center(child: Text("Vacantes")),
+                    const Vacant(),
                     const Horario(),
                     const Center(child: Text("Perfil")),
                   ];

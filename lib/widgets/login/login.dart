@@ -168,7 +168,7 @@ class _LoginFormState extends State<LoginForm> {
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
-
+      debugPrint('Response from endpoint --------------------- $loginResponse.toString()');
       //ACTUALIZA LAS VARIABLES DEL NOTIFICATOR DE ACUERDO A LA RESPONSE DEL LOGIN.
       isLoggedIn.value = true;
       loginController.value = loginResponse;
@@ -197,60 +197,60 @@ class _LoginFormState extends State<LoginForm> {
       valueListenable: isLoggedIn,
       builder: (context, loggedIn, _) {
         return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Iniciar sesión',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 24),
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(
-                labelText: 'Correo',
-                border: OutlineInputBorder(),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Iniciar sesión',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _passwordController,
-              obscureText: !_passwordVisible,
-              decoration: InputDecoration(
-                labelText: 'Contraseña',
-                border: const OutlineInputBorder(),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _passwordVisible
-                        ? Icons.visibility
-                        : Icons.visibility_off,
+              const SizedBox(height: 24),
+              TextField(
+                controller: _emailController,
+                decoration: const InputDecoration(
+                  labelText: 'Correo',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _passwordController,
+                obscureText: !_passwordVisible,
+                decoration: InputDecoration(
+                  labelText: 'Contraseña',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _passwordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _passwordVisible = !_passwordVisible;
+                      });
+                    },
                   ),
-                  onPressed: () {
-                    setState(() {
-                      _passwordVisible = !_passwordVisible;
-                    });
-                  },
                 ),
               ),
-            ),
-            const SizedBox(height: 24),
+              const SizedBox(height: 24),
             if (_error != null)
               Text(
                 _error!,
                 style: const TextStyle(color: Colors.red),
               ),
             const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
                 onPressed: _loading ? null : handleLogin,
                 child: _loading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text('Login', style: theme.textTheme.bodyMedium),
+                ),
               ),
-            ),
-          ],
+            ],
         );
       },
     );
