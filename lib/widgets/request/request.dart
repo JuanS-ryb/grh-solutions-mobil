@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../services/request-services.dart';
+import '../../models/request-models.dart';
 import 'request_created.dart';
 import 'request_view.dart';
 
@@ -9,51 +11,15 @@ class Request extends StatefulWidget {
   State<Request> createState() => _RequestState();
 }
 
-class RequestItem {
-  final String radicado;
-  final String estado;
-  final Color color;
-  final String titulo;
-  final String desde;
-  final String hasta;
-
-  const RequestItem({
-    required this.radicado,
-    required this.estado,
-    required this.color,
-    required this.titulo,
-    required this.desde,
-    required this.hasta,
-  });
-}
-
 class _RequestState extends State<Request> {
-  final List<RequestItem> _requests = [
-    RequestItem(
-      radicado: "SOL-20250313",
-      estado: "Aprobada",
-      color: Colors.greenAccent, // se mantiene (es estado)
-      titulo: "Solicitud urgente..",
-      desde: "09/10/24 12:12 AM",
-      hasta: "3/31/23 2:52 PM",
-    ),
-    RequestItem(
-      radicado: "SOL-20250313",
-      estado: "Rechazada",
-      color: Colors.redAccent,
-      titulo: "Revisión final..",
-      desde: "09/10/24 5:14 PM",
-      hasta: "3/31/23 2:52 PM",
-    ),
-    RequestItem(
-      radicado: "SOL-20250313",
-      estado: "En proceso",
-      color: Colors.grey,
-      titulo: "Documentos completos..",
-      desde: "09/10/24 10:45 AM",
-      hasta: "3/31/23 2:52 PM",
-    ),
-  ];
+  late Future<List<RequestItem>> futureRequests;
+  final RequestService _requestService = RequestService();
+
+  @override
+  void initState() {
+    super.initState();
+    futureRequests = _requestService.getRequests();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +30,7 @@ class _RequestState extends State<Request> {
         padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12),
         child: Column(
           children: [
+            // --- encabezado ---
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -82,120 +49,155 @@ class _RequestState extends State<Request> {
             ),
             const SizedBox(height: 8),
 
+            // --- listado dinámico ---
             Expanded(
-              child: ListView.builder(
-                itemCount: _requests.length,
-                itemBuilder: (context, index) {
-                  final req = _requests[index];
-                  return InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const RequestView(),
-                        ),
-                      );
-                    },
-                    child: Card(
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      color: theme.cardColor,
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // fila superior: radicado + estado (chip)
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "Radicado: ${req.radicado}",
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: theme.colorScheme.primary,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: req.color,
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 6),
-                                  child: Text(
-                                    req.estado,
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: theme.colorScheme.onPrimary,
-                                    ),
-                                  ),
-                                ),
-                              ],
+              child: FutureBuilder<List<RequestItem>>(
+                future: futureRequests,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text("Error: ${snapshot.error}"));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(child: Text("No hay solicitudes"));
+                  }
+
+                  final requests = snapshot.data!;
+
+                  return ListView.builder(
+                    itemCount: requests.length,
+                    itemBuilder: (context, index) {
+                      final req = requests[index];
+
+                      // Definir color según estado
+                      Color color;
+                      switch (req.estado.toLowerCase()) {
+                        case "aprobada":
+                          color = Colors.greenAccent;
+                          break;
+                        case "rechazada":
+                          color = Colors.redAccent;
+                          break;
+                        default:
+                          color = Colors.grey;
+                      }
+
+                      return InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const RequestView(),
                             ),
-                            const SizedBox(height: 10),
-                            Divider(
-                              height: 1,
-                              color: theme.dividerColor,
-                            ),
-                            const SizedBox(height: 10),
-                            // contenido con título + fechas (izq/derecha)
-                            Row(
+                          );
+                        },
+                        child: Card(
+                          margin: const EdgeInsets.symmetric(vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          color: theme.cardColor,
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        req.titulo,
-                                        style:
-                                            theme.textTheme.bodyMedium?.copyWith(
-                                          color: theme
-                                              .textTheme.bodyMedium?.color,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        req.desde,
-                                        style: theme.textTheme.bodySmall
-                                            ?.copyWith(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                // fila superior: id + estado (chip)
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      "Desde",
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(
-                                        color: theme.hintColor,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      req.hasta,
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(
-                                        fontSize: 13,
+                                      "Radicado: ${req.id}",
+                                      style:
+                                          theme.textTheme.bodyMedium?.copyWith(
+                                        color: theme.colorScheme.primary,
                                         fontWeight: FontWeight.w500,
                                       ),
+                                    ),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: color,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 6),
+                                      child: Text(
+                                        req.estado,
+                                        style: theme.textTheme.bodyMedium
+                                            ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: theme.colorScheme.onPrimary,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                Divider(
+                                  height: 1,
+                                  color: theme.dividerColor,
+                                ),
+                                const SizedBox(height: 10),
+                                // contenido con título + fechas
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            req.titulo,
+                                            style: theme
+                                                .textTheme.bodyMedium
+                                                ?.copyWith(
+                                              color: theme.textTheme.bodyMedium
+                                                  ?.color,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            req.createdAt.toString(),
+                                            style: theme.textTheme.bodySmall
+                                                ?.copyWith(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        Text(
+                                          "Hasta",
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
+                                            color: theme.hintColor,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          req.updatedAt.toString(),
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
                               ],
                             ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
+                      );
+                    },
                   );
                 },
               ),
