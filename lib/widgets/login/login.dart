@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:grhsolutions/data/notifiers.dart';
 import 'package:grhsolutions/models/user/login-model.dart';

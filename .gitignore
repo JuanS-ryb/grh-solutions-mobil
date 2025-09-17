@@ -8,3 +8,4 @@ pubspec.lock
 /android
 /ios
 /ios
+ios/Flutter/flutter_export_environment.sh
