@@ -8,6 +8,8 @@ import 'data/notifiers.dart'; // renderNotificator, isLoggedIn, useDarkTheme
 import 'theme/custom-themes.dart';
 import 'domain/dio.dart';
 import 'widgets/vacants/vacants.dart';
+import 'widgets/contrato/contrato_view.dart';
+
 
 final api = ApiService(baseUrl: "http://localhost:3000");
 
@@ -44,6 +46,7 @@ class MyApp extends StatelessWidget {
                     const Vacant(),
                     const Horario(),
                     const Center(child: Text("Perfil")),
+                    const ContractsPage(),
                   ];
 
                   return Scaffold(
@@ -73,6 +76,10 @@ class MyApp extends StatelessWidget {
                         BottomNavigationBarItem(
                           icon: Icon(Icons.person),
                           label: 'Perfil',
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Icon(Icons.description),
+                          label: 'Contratos',
                         ),
                       ],
                       currentIndex: selectedIndex,
