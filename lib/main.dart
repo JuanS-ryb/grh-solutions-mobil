@@ -29,6 +29,11 @@ class MyApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           theme: lightTheme,
           darkTheme: darkTheme,
+          locale: const Locale("es", "ES"),
+          supportedLocales: const [
+            Locale('en', 'US'),
+            Locale('en', 'GB'),
+          ],
           themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
           home: ValueListenableBuilder<bool>(
             valueListenable: isLoggedIn,
