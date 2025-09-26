@@ -9,7 +9,7 @@ class Http {
 
     _dio = Dio(
       BaseOptions(
-        baseUrl: 'http://localhost:3000/api', // Usar localhost 3000 para pruebas.
+        baseUrl: 'http://localhost:3000/api',
         connectTimeout: const Duration(seconds: 5),
         receiveTimeout: const Duration(seconds: 3),
         headers: {
