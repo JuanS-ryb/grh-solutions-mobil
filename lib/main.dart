@@ -50,8 +50,8 @@ class MyApp extends StatelessWidget {
                     const Request(),
                     const Vacant(),
                     const Horario(),
-                    const Center(child: Text("Perfil")),
                     const ContractsPage(),
+                    const Center(child: Text("Perfil")),
                   ];
 
                   return Scaffold(
@@ -79,13 +79,14 @@ class MyApp extends StatelessWidget {
                           label: 'Horarios',
                         ),
                         BottomNavigationBarItem(
-                          icon: Icon(Icons.person),
-                          label: 'Perfil',
-                        ),
-                        BottomNavigationBarItem(
                           icon: Icon(Icons.description),
                           label: 'Contratos',
                         ),
+                        BottomNavigationBarItem(
+                          icon: Icon(Icons.person),
+                          label: 'Perfil',
+                        ),
+                        
                       ],
                       currentIndex: selectedIndex,
                       onTap: (index) {
