@@ -53,6 +53,7 @@ class MyApp extends StatelessWidget {
                   ];
 
                   return Scaffold(
+                    backgroundColor: Theme.of(context).primaryColor,
                     body: widgetOptions[selectedIndex],
                     bottomNavigationBar: BottomNavigationBar(
                       showSelectedLabels: false,

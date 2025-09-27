@@ -14,7 +14,8 @@ class Request extends StatefulWidget {
 
 class _RequestState extends State<Request> {
   late Future<List<RequestItem>> futureRequests;
-  final RequestService _requestService = RequestService(); // Ya no se pasa token
+  final RequestService _requestService =
+      RequestService(); // Ya no se pasa token
 
   @override
   void initState() {
@@ -89,15 +90,14 @@ class _RequestState extends State<Request> {
                       }
 
                       return InkWell(
-onTap: () {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => RequestView(request: req),
-    ),
-  );
-},
-
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => RequestView(request: req),
+                            ),
+                          );
+                        },
                         child: Card(
                           margin: const EdgeInsets.symmetric(vertical: 8),
                           shape: RoundedRectangleBorder(
@@ -156,11 +156,10 @@ onTap: () {
                                         children: [
                                           Text(
                                             req.title,
-                                            style: theme
-                                                .textTheme.bodyMedium
+                                            style: theme.textTheme.bodyMedium
                                                 ?.copyWith(
-                                              color: theme.textTheme.bodyMedium
-                                                  ?.color,
+                                              color: theme
+                                                  .textTheme.bodyMedium?.color,
                                             ),
                                           ),
                                           const SizedBox(height: 8),
