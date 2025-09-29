@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:grhsolutions/services/vacants/relation-vacants.dart';
 import '../base_scaffold.dart';
 import 'package:grhsolutions/models/vacants/get-model.dart';
 import 'package:grhsolutions/services/vacants/get-vacant-id.dart';
 
 class ViewVacants extends StatefulWidget {
   final String id;
+  final bool isMyVacant;
 
-  const ViewVacants({Key? key, required this.id}) : super(key: key);
+  const ViewVacants({
+    Key? key,
+    required this.id,
+    this.isMyVacant = false,
+  }) : super(key: key);
 
   @override
   State<ViewVacants> createState() => _ViewVacantsState();
@@ -75,7 +81,6 @@ class _ViewVacantsState extends State<ViewVacants> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // Descripción larga
             Expanded(
               child: SingleChildScrollView(
                 child: Text(
@@ -85,8 +90,6 @@ class _ViewVacantsState extends State<ViewVacants> {
               ),
             ),
             const SizedBox(height: 20),
-
-            // Caja con detalles
             Container(
               decoration: BoxDecoration(
                 color: Colors.purple.shade50,
@@ -96,51 +99,71 @@ class _ViewVacantsState extends State<ViewVacants> {
                 children: [
                   ListTile(
                     leading: const Icon(Icons.star_border),
-                    title: const Text("Salario",
-                    style: TextStyle(fontSize: 14, color: Colors.black87),),
+                    title: const Text(
+                      "Salario",
+                      style: TextStyle(fontSize: 14, color: Colors.black87),
+                    ),
                     subtitle: Text(selectedVacant!.salary),
                   ),
                   const Divider(height: 1),
                   ListTile(
                     leading: const Icon(Icons.calendar_today),
-                    title: const Text("Fecha de publicación",
-                    style: TextStyle(fontSize: 14, color: Colors.black87),
+                    title: const Text(
+                      "Fecha de publicación",
+                      style: TextStyle(fontSize: 14, color: Colors.black87),
                     ),
                     subtitle: Text(selectedVacant!.createdAt),
                   ),
                   const Divider(height: 1),
                   ListTile(
                     leading: const Icon(Icons.work_outline),
-                    title: const Text("Modalidad", style: TextStyle(fontSize: 14, color: Colors.black87),),
+                    title: const Text(
+                      "Modalidad",
+                      style: TextStyle(fontSize: 14, color: Colors.black87),
+                    ),
                     subtitle: Text(selectedVacant!.typeModality),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 20),
+            if (!widget.isMyVacant)
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: () async {
+                    try {
+                      final service = RelarionsVacanstService();
+                      final result = await service.createPostulate(
+                        selectedVacant!.id,
+                        "pendiente",
+                      );
 
-            // Botón aplicar
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content:
+                                Text("Postulación enviada ✅ ID: ${result.id}")),
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Error: $e")),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.send, color: Colors.white, size: 18),
+                  label: const Text(
+                    "APLICAR",
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Postulación enviada ✅")),
-                  );
-                },
-                icon: const Icon(Icons.send, color: Colors.white, size: 18),
-                label: const Text(
-                  "APLICAR",
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            )
+              )
           ],
         ),
       ),
