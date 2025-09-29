@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../services/request-services.dart';
-import '../../models/request-models.dart';
+import '../../services/request/request-services.dart';
+import '../../models/request/request-models.dart';
 import 'request_created.dart';
 import 'request_view.dart';
 
@@ -14,8 +14,7 @@ class Request extends StatefulWidget {
 
 class _RequestState extends State<Request> {
   late Future<List<RequestItem>> futureRequests;
-  final RequestService _requestService =
-      RequestService(); // Ya no se pasa token
+  final RequestService _requestService = RequestService();
 
   @override
   void initState() {
@@ -37,7 +36,7 @@ class _RequestState extends State<Request> {
         padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12),
         child: Column(
           children: [
-            // --- encabezado ---
+            // --- Encabezado ---
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -49,14 +48,16 @@ class _RequestState extends State<Request> {
                 ),
                 IconButton(
                   onPressed: () {},
-                  icon: Icon(Icons.filter_alt_outlined,
-                      color: theme.iconTheme.color),
-                )
+                  icon: Icon(
+                    Icons.filter_alt_outlined,
+                    color: theme.iconTheme.color,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 8),
 
-            // --- listado dinámico ---
+            // --- Listado dinámico ---
             Expanded(
               child: FutureBuilder<List<RequestItem>>(
                 future: futureRequests,
@@ -85,6 +86,9 @@ class _RequestState extends State<Request> {
                         case "rechazada":
                           color = Colors.redAccent;
                           break;
+                        case "eliminada":
+                          color = Colors.grey.shade800;
+                          break;
                         default:
                           color = Colors.grey;
                       }
@@ -109,15 +113,15 @@ class _RequestState extends State<Request> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // fila superior: id + estado (chip)
+                                // Fila superior: ID + estado (chip)
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       "Radicado: ${req.id}",
-                                      style:
-                                          theme.textTheme.bodyMedium?.copyWith(
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
                                         color: theme.colorScheme.primary,
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -134,7 +138,8 @@ class _RequestState extends State<Request> {
                                         style: theme.textTheme.bodyMedium
                                             ?.copyWith(
                                           fontWeight: FontWeight.bold,
-                                          color: theme.colorScheme.onPrimary,
+                                          color:
+                                              theme.colorScheme.onPrimary,
                                         ),
                                       ),
                                     ),
@@ -146,7 +151,7 @@ class _RequestState extends State<Request> {
                                   color: theme.dividerColor,
                                 ),
                                 const SizedBox(height: 10),
-                                // contenido con título + fechas
+                                // Contenido con título + fechas
                                 Row(
                                   children: [
                                     Expanded(
@@ -179,7 +184,7 @@ class _RequestState extends State<Request> {
                                           CrossAxisAlignment.end,
                                       children: [
                                         Text(
-                                          "Hasta",
+                                          "Actualizado",
                                           style: theme.textTheme.bodySmall
                                               ?.copyWith(
                                             color: theme.hintColor,
