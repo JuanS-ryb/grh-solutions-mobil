@@ -23,9 +23,9 @@ class _myVacantState extends State<myVacant> {
   @override
   void initState() {
     super.initState();
+    debugPrint(loginController.value?.user?.id);
     final String? id = loginController.value?.user?.id;
     debugPrint(id);
-    // Aquí pasas el userId real (puedes obtenerlo de localStorage, provider, etc.)
     _futureVacants = service.getMyVacants(id!);
   }
 
@@ -78,7 +78,6 @@ class _myVacantState extends State<myVacant> {
               ),
               const SizedBox(height: 20),
 
-              // Lista de vacantes desde backend
               Expanded(
                 child: FutureBuilder<GetMyVacants>(
                   future: _futureVacants,
@@ -96,7 +95,6 @@ class _myVacantState extends State<myVacant> {
 
                     final applications = snapshot.data!.applications;
 
-                    // Si quieres aplicar el filtro por tab
                     final filtered = applications.where((app) {
                       switch (_selectedTab) {
                         case 1:
@@ -123,10 +121,8 @@ class _myVacantState extends State<myVacant> {
                           ),
                           child: Row(
                             children: [
-                              // Status
                               buildStatusCircle(app.status),
 
-                              // Info
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -168,7 +164,7 @@ class _myVacantState extends State<myVacant> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) =>
-                                          ViewVacants(id: app.vacant.id),
+                                          ViewVacants(id: app.vacant.id, isMyVacant: true),
                                     ),
                                   );
                                 },

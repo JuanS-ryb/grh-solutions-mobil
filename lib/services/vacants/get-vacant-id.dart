@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/widgets.dart';
 import 'package:grhsolutions/dio/dio.dart';
 import 'package:grhsolutions/models/vacants/get-model.dart';
 
@@ -14,6 +15,7 @@ class GetVacantIdService {
 
       return Vacants.fromJson(response.data);
     } on DioException catch (e) {
+      debugPrint(e.response?.data['message']);
       throw Exception(
           e.response?.data['message'] ?? 'Error al obtener la vacante');
     }
