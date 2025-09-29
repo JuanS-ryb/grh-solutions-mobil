@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
+import '../../services/request/request-services.dart';
+import '../../models/request/request-models.dart';
 
 class RequestCreated extends StatefulWidget {
   const RequestCreated({Key? key}) : super(key: key);
@@ -11,8 +14,18 @@ class _RequestCreatedState extends State<RequestCreated> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   String? _selectedType;
-  DateTime? _fromDate;
-  DateTime? _toDate;
+  PlatformFile? _selectedFile;
+
+  final List<String> tiposSolicitud = [
+    "Vacaciones",
+    "Maternidad",
+    "Préstamos",
+    "Cita médica",
+    "Capacitación",
+    "Permiso personal",
+    "Reunión especial",
+    "Otro",
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -51,36 +64,28 @@ class _RequestCreatedState extends State<RequestCreated> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Campo Titulo
+                        // Título
                         TextField(
                           controller: _titleController,
-                          decoration: InputDecoration(
-                            labelText: "Titulo:",
+                          decoration: const InputDecoration(
+                            labelText: "Título",
                             hintText: "Nombre de la solicitud",
                           ),
                         ),
-                        const Divider(),
+                        const SizedBox(height: 16),
 
-                        // Campo Tipo
+                        // Tipo de solicitud
                         DropdownButtonFormField<String>(
                           value: _selectedType,
                           decoration: const InputDecoration(
-                            labelText: "Tipo:",
+                            labelText: "Tipo de solicitud",
                           ),
-                          items: const [
-                            DropdownMenuItem(
-                              value: "prestamo",
-                              child: Text("Préstamo"),
-                            ),
-                            DropdownMenuItem(
-                              value: "reclamo",
-                              child: Text("Reclamo"),
-                            ),
-                            DropdownMenuItem(
-                              value: "otro",
-                              child: Text("Otro"),
-                            ),
-                          ],
+                          items: tiposSolicitud.map((tipo) {
+                            return DropdownMenuItem(
+                              value: tipo,
+                              child: Text(tipo),
+                            );
+                          }).toList(),
                           onChanged: (value) {
                             setState(() {
                               _selectedType = value;
@@ -88,25 +93,33 @@ class _RequestCreatedState extends State<RequestCreated> {
                           },
                         ),
                         const SizedBox(height: 16),
-                        _buildDateField("Desde:", _fromDate, (date) {
-                          setState(() {
-                            _fromDate = date;
-                          });
-                        }),
-                        const SizedBox(height: 16),
-                        _buildDateField("Hasta:", _toDate, (date) {
-                          setState(() {
-                            _toDate = date;
-                          });
-                        }),
-                        const SizedBox(height: 16),
 
+                        // Descripción (opcional)
                         TextField(
                           controller: _descriptionController,
                           maxLines: 4,
                           decoration: const InputDecoration(
-                            labelText: "Descripcion:",
+                            labelText: "Descripción (opcional)",
                             hintText: "Detalles de la solicitud",
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Archivo (opcional)
+                        ElevatedButton.icon(
+                          onPressed: () async {
+                            final result = await FilePicker.platform.pickFiles();
+                            if (result != null) {
+                              setState(() {
+                                _selectedFile = result.files.first;
+                              });
+                            }
+                          },
+                          icon: const Icon(Icons.attach_file),
+                          label: Text(
+                            _selectedFile != null
+                                ? _selectedFile!.name
+                                : "Adjuntar archivo (opcional)",
                           ),
                         ),
                       ],
@@ -115,46 +128,62 @@ class _RequestCreatedState extends State<RequestCreated> {
                 ),
               ),
             ),
+
+            // Botón Crear
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () async {
+                  if (_titleController.text.isEmpty || _selectedType == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Debe ingresar título y tipo de solicitud"),
+                      ),
+                    );
+                    return;
+                  }
+
+                  final requestService = RequestService();
+
+                  try {
+                    // Mostrar loading
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (context) =>
+                          const Center(child: CircularProgressIndicator()),
+                    );
+
+                    // Crear la solicitud
+                    final RequestItem newRequest = await requestService.createRequest(
+                      title: _titleController.text,
+                      typeRequest: _selectedType!,
+                      description: _descriptionController.text,
+                      file: _selectedFile,
+                    );
+
+                    Navigator.of(context).pop(); // cerrar loading
+
+                    // Mensaje de éxito
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Solicitud creada: ${newRequest.title}"),
+                      ),
+                    );
+
+                    // Regresar a la pantalla anterior y forzar recarga
+                    Navigator.of(context).pop(true);
+                  } catch (e) {
+                    Navigator.of(context).pop(); // cerrar loading
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Error al crear solicitud: $e")),
+                    );
+                  }
+                },
                 child: const Text("Crear"),
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDateField(
-      String label, DateTime? date, Function(DateTime) onDateSelected) {
-    final theme = Theme.of(context);
-
-    return InkWell(
-      onTap: () async {
-        DateTime? picked = await showDatePicker(
-          context: context,
-          initialDate: DateTime.now(),
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2100),
-        );
-        if (picked != null) {
-          onDateSelected(picked);
-        }
-      },
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: label,
-        ),
-        child: Text(
-          date != null
-              ? "${date.day}/${date.month}/${date.year}"
-              : "dd/mm/aaaa",
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: date == null ? theme.hintColor : theme.colorScheme.onSurface,
-          ),
         ),
       ),
     );

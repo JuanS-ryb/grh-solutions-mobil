@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
 import '../../dio/dio.dart';
 import '../../models/request/request-models.dart';
 
@@ -9,16 +11,9 @@ class RequestService {
   Future<List<RequestItem>> getRequests() async {
     try {
       final Response response = await _http.get('$baseEndpoint/getAll');
-
-      // Asegurarse que response.data sea lista
-      final List<dynamic> data =
-          response.data is List ? response.data : [];
-
-      // Mapear cada elemento al modelo, forzando _id a String
+      final List<dynamic> data = response.data is List ? response.data : [];
       return data.map((e) {
-        // Si e es Map<String, dynamic>
         if (e is Map<String, dynamic>) {
-          // Forzar _id a string
           e['_id'] = e['_id']?.toString();
           return RequestItem.fromJson(e);
         }
@@ -28,11 +23,56 @@ class RequestService {
           status: '',
           typeRequest: '',
           createdAt: DateTime.now(),
-          updatedAt: DateTime.now(), createdBy: '', file: [],
-        ); // fallback seguro
+          updatedAt: DateTime.now(),
+          createdBy: '',
+          file: [],
+        );
       }).toList();
     } catch (e) {
       print("Error al cargar requests: $e");
+      rethrow;
+    }
+  }
+
+  /// Crear solicitud
+  Future<RequestItem> createRequest({
+    required String title,
+    required String typeRequest,
+    String? description,
+    PlatformFile? file,
+  }) async {
+    try {
+      List<Map<String, dynamic>> fileData = [];
+      if (file != null) {
+        final base64File = base64Encode(file.bytes!);
+        fileData = [
+          {
+            "id": DateTime.now().millisecondsSinceEpoch.toString(),
+            "name": file.name,
+            "type": file.extension ?? '',
+            "size": file.size,
+            "base64": base64File,
+          }
+        ];
+      }
+
+      final payload = {
+        "title": title,
+        "type_request": typeRequest,
+        if (description != null && description.isNotEmpty) "infoDx": description,
+        if (fileData.isNotEmpty) "file": fileData,
+      };
+
+      final Response response = await _http.post('$baseEndpoint/create', data: payload);
+
+      // Retornamos el objeto creado
+      if (response.data != null && response.data is Map<String, dynamic>) {
+        return RequestItem.fromJson(response.data);
+      } else {
+        throw Exception("Error al crear solicitud: respuesta inválida");
+      }
+    } catch (e) {
+      print("Error al crear solicitud: $e");
       rethrow;
     }
   }

@@ -18,14 +18,11 @@ class HistoryService {
         queryParameters: {'requestId': requestId},
       );
 
-      // Depuración: mostrar datos recibidos
-      print("Respuesta del historial: ${response.data}");
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
         return data.map((e) => HistoryItem.fromJson(e)).toList();
       } else {
-        print("Error en la respuesta: ${response.statusCode}");
         return [];
       }
     } on DioException catch (dioError) {

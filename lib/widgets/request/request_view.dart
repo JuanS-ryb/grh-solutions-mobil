@@ -161,10 +161,10 @@ class _RequestViewState extends State<RequestView> {
         return HistorialView(requestId: req.id);
 
       case "ASIGNADOS":
-        return const AsignadosView();
+        return AsignadosView(requestId: req.id);
 
       case "SEGUIMIENTOS":
-        return const SeguimientosView();
+        return SeguimientosView(requestId: req.id);
 
       default:
         return const SizedBox();

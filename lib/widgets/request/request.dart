@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../services/request/request-services.dart';
+import '../../services/request/request-services.dart'; // Asegúrate que apunta al service correcto
 import '../../models/request/request-models.dart';
-import 'request_created.dart';
+import 'request_created.dart' hide RequestService;
 import 'request_view.dart';
 
 class Request extends StatefulWidget {
@@ -115,13 +115,11 @@ class _RequestState extends State<Request> {
                               children: [
                                 // Fila superior: ID + estado (chip)
                                 Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       "Radicado: ${req.id}",
-                                      style: theme.textTheme.bodyMedium
-                                          ?.copyWith(
+                                      style: theme.textTheme.bodyMedium?.copyWith(
                                         color: theme.colorScheme.primary,
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -131,15 +129,12 @@ class _RequestState extends State<Request> {
                                         color: color,
                                         borderRadius: BorderRadius.circular(6),
                                       ),
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 6),
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                       child: Text(
                                         req.status,
-                                        style: theme.textTheme.bodyMedium
-                                            ?.copyWith(
+                                        style: theme.textTheme.bodyMedium?.copyWith(
                                           fontWeight: FontWeight.bold,
-                                          color:
-                                              theme.colorScheme.onPrimary,
+                                          color: theme.colorScheme.onPrimary,
                                         ),
                                       ),
                                     ),
@@ -156,22 +151,18 @@ class _RequestState extends State<Request> {
                                   children: [
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             req.title,
-                                            style: theme.textTheme.bodyMedium
-                                                ?.copyWith(
-                                              color: theme
-                                                  .textTheme.bodyMedium?.color,
+                                            style: theme.textTheme.bodyMedium?.copyWith(
+                                              color: theme.textTheme.bodyMedium?.color,
                                             ),
                                           ),
                                           const SizedBox(height: 8),
                                           Text(
                                             formatDate(req.createdAt),
-                                            style: theme.textTheme.bodySmall
-                                                ?.copyWith(
+                                            style: theme.textTheme.bodySmall?.copyWith(
                                               fontSize: 13,
                                               fontWeight: FontWeight.w500,
                                             ),
@@ -180,21 +171,18 @@ class _RequestState extends State<Request> {
                                       ),
                                     ),
                                     Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
+                                      crossAxisAlignment: CrossAxisAlignment.end,
                                       children: [
                                         Text(
                                           "Actualizado",
-                                          style: theme.textTheme.bodySmall
-                                              ?.copyWith(
+                                          style: theme.textTheme.bodySmall?.copyWith(
                                             color: theme.hintColor,
                                           ),
                                         ),
                                         const SizedBox(height: 8),
                                         Text(
                                           formatDate(req.updatedAt),
-                                          style: theme.textTheme.bodySmall
-                                              ?.copyWith(
+                                          style: theme.textTheme.bodySmall?.copyWith(
                                             fontSize: 13,
                                             fontWeight: FontWeight.w500,
                                           ),
@@ -227,13 +215,20 @@ class _RequestState extends State<Request> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  onPressed: () {
-                    Navigator.push(
+                  onPressed: () async {
+                    final result = await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => const RequestCreated(),
                       ),
                     );
+
+                    if (result == true) {
+                      // 🔹 Recargar la lista de solicitudes
+                      setState(() {
+                        futureRequests = _requestService.getRequests();
+                      });
+                    }
                   },
                   child: Text(
                     "Crear Solicitud",

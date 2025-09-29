@@ -39,17 +39,17 @@ class Profile {
       user: json['user'] ?? '',
       name: json['name'] ?? '',
       lastname: json['lastname'] ?? '',
-      dateOfBirth: DateTime.parse(json['date_of_birth'] ?? DateTime.now().toIso8601String()),
+      dateOfBirth: DateTime.tryParse(json['date_of_birth'] ?? '') ?? DateTime.now(),
       email: json['email'] ?? '',
       address: json['address'] ?? '',
-      numberPhone: json['number_phone'] ?? 0,
+      numberPhone: int.tryParse(json['number_phone']?.toString() ?? '0') ?? 0,
       rh: json['rh'] ?? '',
       status: json['status'] ?? '',
       typeDocument: json['type_document'] ?? '',
       document: json['document'] ?? '',
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
-      updatedAt: DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
-      telephone: json['telephone'] ?? 0,
+      createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updatedAt'] ?? '') ?? DateTime.now(),
+      telephone: int.tryParse(json['telephone']?.toString() ?? '0') ?? 0,
     );
   }
 }
@@ -70,12 +70,36 @@ class HistoryItem {
   });
 
   factory HistoryItem.fromJson(Map<String, dynamic> json) {
+    // Si profileId viene como String, crea un Profile con datos mínimos
+    Profile profile;
+    if (json['profileId'] is Map<String, dynamic>) {
+      profile = Profile.fromJson(json['profileId']);
+    } else {
+      profile = Profile(
+        id: json['profileId'] ?? '',
+        user: '',
+        name: '',
+        lastname: '',
+        dateOfBirth: DateTime.now(),
+        email: '',
+        address: '',
+        numberPhone: 0,
+        rh: '',
+        status: '',
+        typeDocument: '',
+        document: '',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        telephone: 0,
+      );
+    }
+
     return HistoryItem(
       id: json['_id'] ?? '',
       requestId: json['requestId'] ?? '',
-      profile: Profile.fromJson(json['profileId'] ?? {}),
+      profile: profile,
       description: json['description'] ?? '',
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
+      createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
     );
   }
 }

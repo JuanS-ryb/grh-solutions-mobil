@@ -17,7 +17,7 @@ class _HistorialViewState extends State<HistorialView> {
   @override
   void initState() {
     super.initState();
-    futureHistory = _historyService.getHistory(widget.requestId);
+    futureHistory = _historyService.getHistory(widget.requestId as String);
   }
 
   @override
