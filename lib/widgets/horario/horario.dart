@@ -17,7 +17,7 @@ class _HorarioState extends State<Horario> {
 
   String grupo = '';
   Map<DateTime, String> horarios = {};
-  String horarioGeneral = ''; 
+  String horarioGeneral = '';
 
   @override
   void initState() {
@@ -55,7 +55,8 @@ class _HorarioState extends State<Horario> {
           continue;
         }
 
-        final key = DateTime(fechaInicio.year, fechaInicio.month, fechaInicio.day);
+        final key =
+            DateTime(fechaInicio.year, fechaInicio.month, fechaInicio.day);
         print('🔑 Clave generada: $key');
 
         String tipo = '';
@@ -133,8 +134,13 @@ class _HorarioState extends State<Horario> {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text("Calendario")),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        title: const Text("Calendario"),
+        backgroundColor: theme.primaryColor,
+      ),
       body: Column(
         children: [
           const SizedBox(height: 12),
@@ -145,7 +151,8 @@ class _HorarioState extends State<Horario> {
           const SizedBox(height: 4),
           Text(
             _selectedDay != null
-                ? (horarios[DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day)] ??
+                ? (horarios[DateTime(_selectedDay!.year, _selectedDay!.month,
+                        _selectedDay!.day)] ??
                     horarioGeneral ??
                     "Sin horario")
                 : "Selecciona un día para ver horario",
@@ -162,20 +169,25 @@ class _HorarioState extends State<Horario> {
               formatButtonVisible: false,
               titleCentered: true,
             ),
-            calendarStyle: const CalendarStyle(
-              todayDecoration: BoxDecoration(
+            calendarStyle: CalendarStyle(
+              todayDecoration: const BoxDecoration(
                   color: Colors.blueAccent, shape: BoxShape.circle),
-              selectedDecoration:
-                  BoxDecoration(color: Colors.blue, shape: BoxShape.circle),
+              selectedDecoration: const BoxDecoration(
+                  color: Colors.blue, shape: BoxShape.circle),
+              defaultTextStyle: TextStyle(
+                color: Theme.of(context).textTheme.labelSmall?.color ??
+                    Colors.black, // Usamos tu color personalizado
+              ),
             ),
-            rowHeight: 80, 
+            rowHeight: 80,
             onDaySelected: (selectedDay, focusedDay) {
               setState(() {
                 _selectedDay = selectedDay;
                 _focusedDay = focusedDay;
               });
-              
-              final clave = DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
+
+              final clave = DateTime(
+                  selectedDay.year, selectedDay.month, selectedDay.day);
               print('Día seleccionado: $clave');
               print('Horario: "${horarios[clave]}"');
             },
@@ -210,14 +222,13 @@ class _HorarioState extends State<Horario> {
 
   Widget _buildDayCell(DateTime day,
       {bool isToday = false, bool isSelected = false}) {
-
     final clave = DateTime(day.year, day.month, day.day);
-    
+
     String? horario = horarios[clave];
     if (horario == null || horario.isEmpty) {
-      horario = horarioGeneral; 
+      horario = horarioGeneral;
     }
-    
+
     return Container(
       margin: const EdgeInsets.all(2),
       child: Column(
@@ -237,19 +248,27 @@ class _HorarioState extends State<Horario> {
             alignment: Alignment.center,
             child: Text('${day.day}',
                 style: TextStyle(
-                    color: isSelected || isToday ? Colors.white : Colors.black,
+                    color: isSelected || isToday
+                        ? Colors.white
+                        : Theme.of(context).textTheme.labelSmall?.color ??
+                            Colors.black,
                     fontWeight: FontWeight.bold,
                     fontSize: 14)),
           ),
           const SizedBox(height: 2),
           Container(
-            height: 16, 
+            height: 16,
             child: Text(
               horario ?? "",
               style: TextStyle(
-                fontSize: 9, 
-                color: (horario != null && horario.isNotEmpty) ? Colors.blue : Colors.grey,
-                fontWeight: (horario != null && horario.isNotEmpty) ? FontWeight.w500 : FontWeight.normal,
+                fontSize: 9,
+                color: (horario != null && horario.isNotEmpty)
+                    ? Colors.blue
+                    : Theme.of(context).textTheme.labelSmall?.color ??
+                        Colors.grey, // Usamos tu color
+                fontWeight: (horario != null && horario.isNotEmpty)
+                    ? FontWeight.w500
+                    : FontWeight.normal,
               ),
               textAlign: TextAlign.center,
               maxLines: 1,

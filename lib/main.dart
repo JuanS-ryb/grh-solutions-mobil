@@ -8,6 +8,7 @@ import 'data/notifiers.dart'; // renderNotificator, isLoggedIn, useDarkTheme
 import 'theme/custom-themes.dart';
 import 'domain/dio.dart';
 import 'widgets/vacants/vacants.dart';
+import 'widgets/perfil/perfil.dart';
 
 final api = ApiService(baseUrl: "http://localhost:3000");
 
@@ -48,10 +49,11 @@ class MyApp extends StatelessWidget {
                     const Request(),
                     const Vacant(),
                     const Horario(),
-                    const Center(child: Text("Perfil")),
+                    const Perfil(),
                   ];
 
                   return Scaffold(
+                    backgroundColor: Theme.of(context).primaryColor,
                     body: widgetOptions[selectedIndex],
                     bottomNavigationBar: BottomNavigationBar(
                       showSelectedLabels: false,

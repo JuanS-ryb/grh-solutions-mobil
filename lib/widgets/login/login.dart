@@ -33,7 +33,7 @@ class _LoginState extends State<Login> {
               decoration: BoxDecoration(
                 color: bg,
                 borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(30)),
+                    const BorderRadius.vertical(top: Radius.circular(30)),
               ),
               child: SingleChildScrollView(
                 controller: scrollController,
@@ -70,7 +70,7 @@ class _LoginState extends State<Login> {
               decoration: BoxDecoration(
                 color: bg,
                 borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(30)),
+                    const BorderRadius.vertical(top: Radius.circular(30)),
               ),
               child: SingleChildScrollView(
                 controller: scrollController,
@@ -94,7 +94,7 @@ class _LoginState extends State<Login> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).primaryColor,
       body: SafeArea(
         child: Align(
           alignment: Alignment.bottomCenter,
@@ -116,7 +116,7 @@ class _LoginState extends State<Login> {
               ],
             ),
             child: Column(
-              mainAxisSize: MainAxisSize.min,  // 👈 evita overflow
+              mainAxisSize: MainAxisSize.min, // 👈 evita overflow
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 const Text(
@@ -337,7 +337,6 @@ class _RegisterFormState extends State<RegisterForm> {
     return date;
   }
 
-
   void _pickBirthDate() async {
     final now = DateTime.now();
     final picked = await showDatePicker(
@@ -383,7 +382,8 @@ class _RegisterFormState extends State<RegisterForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Registrarse', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const Text('Registrarse',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 24),
 
             // Nombres
@@ -392,7 +392,9 @@ class _RegisterFormState extends State<RegisterForm> {
                 Expanded(
                   child: TextFormField(
                     controller: _firstNameController,
-                    decoration: const InputDecoration(labelText: 'Primer Nombre', border: OutlineInputBorder()),
+                    decoration: const InputDecoration(
+                        labelText: 'Primer Nombre',
+                        border: OutlineInputBorder()),
                     validator: (v) => v!.isEmpty ? "Campo requerido" : null,
                   ),
                 ),
@@ -400,7 +402,9 @@ class _RegisterFormState extends State<RegisterForm> {
                 Expanded(
                   child: TextFormField(
                     controller: _secondNameController,
-                    decoration: const InputDecoration(labelText: 'Segundo Nombre', border: OutlineInputBorder()),
+                    decoration: const InputDecoration(
+                        labelText: 'Segundo Nombre',
+                        border: OutlineInputBorder()),
                   ),
                 ),
               ],
@@ -413,7 +417,9 @@ class _RegisterFormState extends State<RegisterForm> {
                 Expanded(
                   child: TextFormField(
                     controller: _firstLastNameController,
-                    decoration: const InputDecoration(labelText: 'Primer Apellido', border: OutlineInputBorder()),
+                    decoration: const InputDecoration(
+                        labelText: 'Primer Apellido',
+                        border: OutlineInputBorder()),
                     validator: (v) => v!.isEmpty ? "Campo requerido" : null,
                   ),
                 ),
@@ -421,7 +427,9 @@ class _RegisterFormState extends State<RegisterForm> {
                 Expanded(
                   child: TextFormField(
                     controller: _secondLastNameController,
-                    decoration: const InputDecoration(labelText: 'Segundo Apellido', border: OutlineInputBorder()),
+                    decoration: const InputDecoration(
+                        labelText: 'Segundo Apellido',
+                        border: OutlineInputBorder()),
                   ),
                 ),
               ],
@@ -431,7 +439,9 @@ class _RegisterFormState extends State<RegisterForm> {
             // Email
             TextFormField(
               controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Correo Electrónico', border: OutlineInputBorder()),
+              decoration: const InputDecoration(
+                  labelText: 'Correo Electrónico',
+                  border: OutlineInputBorder()),
               keyboardType: TextInputType.emailAddress,
               validator: (v) {
                 if (v == null || v.isEmpty) return "Campo requerido";
@@ -449,8 +459,11 @@ class _RegisterFormState extends State<RegisterForm> {
                 labelText: 'Contraseña',
                 border: const OutlineInputBorder(),
                 suffixIcon: IconButton(
-                  icon: Icon(_passwordVisible ? Icons.visibility : Icons.visibility_off),
-                  onPressed: () => setState(() => _passwordVisible = !_passwordVisible),
+                  icon: Icon(_passwordVisible
+                      ? Icons.visibility
+                      : Icons.visibility_off),
+                  onPressed: () =>
+                      setState(() => _passwordVisible = !_passwordVisible),
                 ),
               ),
               validator: (v) => v!.length < 6 ? "Mínimo 6 caracteres" : null,
@@ -465,17 +478,21 @@ class _RegisterFormState extends State<RegisterForm> {
                 labelText: 'Confirmar Contraseña',
                 border: const OutlineInputBorder(),
                 suffixIcon: IconButton(
-                  icon: Icon(_confirmPasswordVisible ? Icons.visibility : Icons.visibility_off),
-                  onPressed: () => setState(() => _confirmPasswordVisible = !_confirmPasswordVisible),
+                  icon: Icon(_confirmPasswordVisible
+                      ? Icons.visibility
+                      : Icons.visibility_off),
+                  onPressed: () => setState(
+                      () => _confirmPasswordVisible = !_confirmPasswordVisible),
                 ),
               ),
-              validator: (v) => v != _passwordController.text ? "Las contraseñas no coinciden" : null,
+              validator: (v) => v != _passwordController.text
+                  ? "Las contraseñas no coinciden"
+                  : null,
             ),
             const SizedBox(height: 16),
 
             // Tipo de documento
             DropdownButtonFormField<String>(
-
               initialValue: _selectedDocumentId,
               decoration: const InputDecoration(
                 labelText: "Tipo de Documento",
@@ -483,7 +500,6 @@ class _RegisterFormState extends State<RegisterForm> {
               ),
               items: _documentTypes.map((doc) {
                 return DropdownMenuItem<String>(
-
                   value: doc.id,
                   child: Text(doc.name),
                 );
@@ -494,14 +510,16 @@ class _RegisterFormState extends State<RegisterForm> {
                 });
               },
               validator: (value) =>
-              value == null ? "Seleccione un tipo de documento" : null,
+                  value == null ? "Seleccione un tipo de documento" : null,
             ),
             const SizedBox(height: 16),
 
             // Número documento
             TextFormField(
               controller: _docNumberController,
-              decoration: const InputDecoration(labelText: 'Número de documento', border: OutlineInputBorder()),
+              decoration: const InputDecoration(
+                  labelText: 'Número de documento',
+                  border: OutlineInputBorder()),
               keyboardType: TextInputType.number,
               validator: (v) => v!.isEmpty ? "Campo requerido" : null,
             ),
@@ -513,7 +531,9 @@ class _RegisterFormState extends State<RegisterForm> {
                 final today = DateTime.now();
                 final minDate = DateTime(1900);
                 // si ya tienes un _birthDate, lo aseguras dentro del rango; si no, úsalo por defecto en today
-                final initial = _birthDate == null ? today : _clampDate(_birthDate!, minDate, today);
+                final initial = _birthDate == null
+                    ? today
+                    : _clampDate(_birthDate!, minDate, today);
 
                 final picked = await showDatePickerDialog(
                   context: context,
@@ -537,7 +557,9 @@ class _RegisterFormState extends State<RegisterForm> {
                   if (picked.isAfter(today)) {
                     // nunca debería ocurrir porque maxDate = today, pero por seguridad:
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('No puede seleccionar una fecha futura')),
+                      const SnackBar(
+                          content:
+                              Text('No puede seleccionar una fecha futura')),
                     );
                     return;
                   }
