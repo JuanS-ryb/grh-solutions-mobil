@@ -39,7 +39,7 @@ class RequestService {
     required String title,
     required String typeRequest,
     String? description,
-    PlatformFile? file,
+    PlatformFile? file, required String createdBy, required String status,
   }) async {
     try {
       List<Map<String, dynamic>> fileData = [];

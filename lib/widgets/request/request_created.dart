@@ -159,7 +159,7 @@ class _RequestCreatedState extends State<RequestCreated> {
                       title: _titleController.text,
                       typeRequest: _selectedType!,
                       description: _descriptionController.text,
-                      file: _selectedFile,
+                      file: _selectedFile, createdBy: '', status: '',
                     );
 
                     Navigator.of(context).pop(); // cerrar loading

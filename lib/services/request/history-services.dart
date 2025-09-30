@@ -37,4 +37,6 @@ class HistoryService {
       return [];
     }
   }
+
+  Future<void> createHistory({required String requestId, required String profileId, required String description}) async {}
 }

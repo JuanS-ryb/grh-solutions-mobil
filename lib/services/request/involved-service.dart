@@ -26,4 +26,6 @@ class InvolvedService {
       return [];
     }
   }
+
+  Future<void> createInvolved({required String requestId, required String profileId, required String assignedBy, required String role}) async {}
 }

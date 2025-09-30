@@ -5,7 +5,7 @@ import '../../services/request/history-services.dart';
 import 'historial_view.dart';
 import 'asignados_view.dart';
 import 'seguimientos_view.dart';
-import 'request_edit.dart';
+import 'request_doc.dart'; // ✅ nuevo import
 
 class RequestView extends StatefulWidget {
   final RequestItem request;
@@ -95,7 +95,7 @@ class _RequestViewState extends State<RequestView> {
           ],
         ),
       ),
-      floatingActionButton: EditRequestButton(request: widget.request),
+      floatingActionButton: RequestDocButton(request: widget.request), // ✅ cambiado
     );
   }
 
@@ -157,7 +157,6 @@ class _RequestViewState extends State<RequestView> {
         );
 
       case "HISTORIAL":
-        // 🔹 Aquí pasamos correctamente el requestId
         return HistorialView(requestId: req.id);
 
       case "ASIGNADOS":
@@ -182,9 +181,10 @@ class _RequestViewState extends State<RequestView> {
   }
 }
 
-class EditRequestButton extends StatelessWidget {
+// ✅ Nuevo botón para abrir documentos
+class RequestDocButton extends StatelessWidget {
   final RequestItem request;
-  const EditRequestButton({super.key, required this.request});
+  const RequestDocButton({super.key, required this.request});
 
   @override
   Widget build(BuildContext context) {
@@ -196,17 +196,11 @@ class EditRequestButton extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => RequestEdit(
-              title: request.title.isNotEmpty ? request.title : "Sin título",
-              description: request.infoDx ?? "Sin descripción",
-              type: request.typeRequest.isNotEmpty ? request.typeRequest : "otro",
-              fromDate: request.createdAt,
-              toDate: request.updatedAt,
-            ),
+            builder: (context) => RequestDoc(request: request, documentos: null,),
           ),
         );
       },
-      child: Icon(Icons.edit, color: theme.colorScheme.onPrimary),
+      child: Icon(Icons.description, color: theme.colorScheme.onPrimary),
     );
   }
 }

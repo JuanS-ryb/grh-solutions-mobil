@@ -68,4 +68,6 @@ class ProfileService {
       return null;
     }
   }
+
+  Future getMyProfile() async {}
 }
