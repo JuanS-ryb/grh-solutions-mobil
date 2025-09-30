@@ -52,7 +52,8 @@ class _ComunicadosState extends State<Comunicados> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Noticias")),
+      appBar: AppBar(title: const Text("Noticias"), backgroundColor:  Theme.of(context).primaryColor,),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: ListView.builder(
         itemCount: _news.length + 1,
         itemBuilder: (context, index) {

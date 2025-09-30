@@ -136,7 +136,7 @@ class _OpenVacantsState extends State<OpenVacants> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ViewVacants(id: item.id),
+                          builder: (context) => ViewVacants(id: item.id, isMyVacant: false),
                         ),
                       );
                     },
