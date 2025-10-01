@@ -131,7 +131,6 @@ class _PerfilState extends State<Perfil> with TickerProviderStateMixin {
                 ),
                 const Tab(text: "MI INFORMACIÓN"),
                 const Tab(text: "CERTIFICADOS"),
-                const Tab(text: "HOJA DE VIDA"),
               ],
             ),
           ),
