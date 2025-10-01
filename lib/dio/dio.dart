@@ -27,7 +27,7 @@ class Http {
       final response = await _dio.get(path, queryParameters: queryParameters);
       return response;
     } on DioException catch (e) {
-      _handleDioError(e, path);
+      handleDioError(e, path);
       rethrow;
     } catch (e) {
       print('Error inesperado en GET $path: $e');
@@ -41,7 +41,7 @@ class Http {
       final response = await _dio.get('$path/$id');
       return response;
     } on DioException catch (e) {
-      _handleDioError(e, '$path/$id');
+      handleDioError(e, '$path/$id');
       rethrow;
     } catch (e) {
       print('Error inesperado en GET $path/$id: $e');
@@ -55,7 +55,7 @@ class Http {
       final response = await _dio.post(path, data: data);
       return response;
     } on DioException catch (e) {
-      _handleDioError(e, path);
+      handleDioError(e, path);
       rethrow;
     } catch (e) {
       print('Error inesperado en POST $path: $e');
@@ -69,7 +69,7 @@ class Http {
       final response = await _dio.put('$path/$id', data: data);
       return response;
     } on DioException catch (e) {
-      _handleDioError(e, '$path/$id');
+      handleDioError(e, '$path/$id');
       rethrow;
     } catch (e) {
       print('Error inesperado en PUT $path/$id: $e');
@@ -83,7 +83,7 @@ class Http {
       final response = await _dio.delete('$path/$id');
       return response;
     } on DioException catch (e) {
-      _handleDioError(e, '$path/$id');
+      handleDioError(e, '$path/$id');
       rethrow;
     } catch (e) {
       print('Error inesperado en DELETE $path/$id: $e');
@@ -91,24 +91,25 @@ class Http {
     }
   }
 
-  // Manejo de errores de Dio
-  void _handleDioError(DioException e, String requestPath) {
+  void handleDioError(DioException e, String requestPath) {
     String errorMessage;
+
     if (e.response != null) {
+      final statusCode = e.response?.statusCode;
+
+      // 🚨 Catcher de 401 → cerrar sesión automáticamente
+      if (statusCode == 401) {
+        isLoggedIn.value = false;
+        loginController.value = null;
+        print("Sesión cerrada automáticamente por 401 Unauthorized");
+      }
+
       errorMessage =
-          'Error en la solicitud a $requestPath: ${e.response?.statusCode} - ${e.response?.data?['message'] ?? e.response?.statusMessage}';
+      'Error en la solicitud a $requestPath: $statusCode - ${e.response?.data?['message'] ?? e.response?.statusMessage}';
     } else {
       errorMessage = 'Error de conexión en $requestPath: ${e.message}';
     }
-    print(errorMessage);
-  }
 
-  // Método para actualizar el token dinámicamente
-  void setAuthorizationToken(String? token) {
-    if (token != null) {
-      _dio.options.headers['Authorization'] = 'Bearer $token';
-    } else {
-      _dio.options.headers.remove('Authorization');
-    }
+    print(errorMessage);
   }
 }
