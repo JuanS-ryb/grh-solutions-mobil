@@ -44,7 +44,7 @@ class _PerfilState extends State<Perfil> with TickerProviderStateMixin {
     super.initState();
     getProfile();
     _tabController = TabController(
-      length: 4,
+      length: 3,
       vsync: this,
       initialIndex: 1, // Inicia en "Mi información" (index 1)
     );
@@ -63,7 +63,6 @@ class _PerfilState extends State<Perfil> with TickerProviderStateMixin {
         Center(child: CircularProgressIndicator()),
         Center(child: CircularProgressIndicator()),
         Center(child: CircularProgressIndicator()),
-        Center(child: CircularProgressIndicator()),
       ];
     }
 
@@ -72,7 +71,6 @@ class _PerfilState extends State<Perfil> with TickerProviderStateMixin {
         const SettingsScreen(),
         const Center(child: Text("Error cargando perfil")),
         const Center(child: Text('Opción 3: Certificados', style: TextStyle(fontSize: 18))),
-        const Center(child: Text('Opción 4: Hoja de vida', style: TextStyle(fontSize: 18))),
       ];
     }
 
@@ -80,7 +78,6 @@ class _PerfilState extends State<Perfil> with TickerProviderStateMixin {
       const SettingsScreen(),
       MiProfileScreen(profile: myProfile),
       MiCertificadosScreen(profile: myProfile),
-      const Center(child: Text('Opción 4: Hoja de vida', style: TextStyle(fontSize: 18))),
     ];
   }
 
