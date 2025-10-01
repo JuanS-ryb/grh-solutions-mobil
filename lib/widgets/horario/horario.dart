@@ -35,46 +35,44 @@ class _HorarioState extends State<Horario> {
       print('=== DEBUG: Total horarios recibidos: ${res.length} ===');
 
       for (final h in res) {
-        print('--- Procesando horario ---');
-        print('ID: ${h.id}');
+        print('rocesando horario ');
+        print('Id: ${h.id}');
         print('startDate (String): "${h.startDate}"');
         print('scheduleType: ${h.scheduleType?.name}');
         print('group: ${h.group?.name}');
 
         if (h.startDate.isEmpty) {
-          print('❌ Saltando: startDate está vacío');
+          print(' Saltando: startDate está vacío');
           continue;
         }
 
         DateTime fechaInicio;
         try {
           fechaInicio = DateTime.parse(h.startDate).toLocal();
-          print('✅ Fecha parseada: $fechaInicio');
+          print(' Fecha parseada: $fechaInicio');
         } catch (err) {
-          print('❌ Error parseando fecha "${h.startDate}": $err');
+          print('Error parseando fecha "${h.startDate}": $err');
           continue;
         }
 
-        final key =
-            DateTime(fechaInicio.year, fechaInicio.month, fechaInicio.day);
-        print('🔑 Clave generada: $key');
+        final key = DateTime(fechaInicio.year, fechaInicio.month, fechaInicio.day);
+        print(' Clave generada: $key');
 
         String tipo = '';
         if (h.scheduleType?.name != null && h.scheduleType!.name.isNotEmpty) {
           tipo = h.scheduleType!.name;
           horarioGeneral = tipo;
         }
-        print('📅 Tipo horario: "$tipo"');
+        print('Tipo horario: "$tipo"');
 
         mapaHorarios[key] = tipo;
 
         if (h.group?.name != null && h.group!.name.isNotEmpty) {
           nombreGrupo = h.group!.name;
-          print('👥 Grupo: $nombreGrupo');
+          print(' Grupo: $nombreGrupo');
         }
       }
 
-      print('=== RESULTADO FINAL ===');
       print('Horarios mapeados: ${mapaHorarios.length}');
       mapaHorarios.forEach((fecha, tipo) {
         print('$fecha -> "$tipo"');
@@ -86,11 +84,9 @@ class _HorarioState extends State<Horario> {
           horarios = mapaHorarios;
           grupo = nombreGrupo;
         });
-        print(' Estado actualizado');
-        print(' Horario general para mostrar: "$horarioGeneral"');
+        print(' Horario general "$horarioGeneral"');
       }
     } catch (e, st) {
-      print(' ERROR GENERAL: $e');
       print('Stack trace: $st');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

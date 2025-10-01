@@ -39,7 +39,6 @@ class _CrearInasistenciaState extends State<CrearInasistencia> {
       return;
     }
 
-    debugPrint('Creando inasistencia:');
     debugPrint('Fecha: ${widget.fechaSeleccionada}');
     debugPrint('Horario: ${widget.horario}');
     debugPrint('Grupo: ${widget.grupo}');
@@ -89,7 +88,7 @@ class _CrearInasistenciaState extends State<CrearInasistencia> {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.blue[50],
+                color: const Color.fromARGB(255, 0, 149, 255),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
@@ -107,7 +106,7 @@ class _CrearInasistenciaState extends State<CrearInasistencia> {
                     'Grupo: ${widget.grupo}',
                     style: const TextStyle(
                       fontSize: 14,
-                      color: Colors.grey,
+                      color: Color.fromARGB(255, 255, 255, 255),
                     ),
                   ),
                   if (widget.horario != null) ...[
@@ -116,7 +115,7 @@ class _CrearInasistenciaState extends State<CrearInasistencia> {
                       'Horario: ${widget.horario}',
                       style: const TextStyle(
                         fontSize: 14,
-                        color: Colors.grey,
+                        color: Color.fromARGB(255, 249, 249, 249),
                       ),
                     ),
                   ],
@@ -133,7 +132,7 @@ class _CrearInasistenciaState extends State<CrearInasistencia> {
                 hintText: 'Nombre de la solicitud',
                 border: OutlineInputBorder(),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: Color.fromARGB(255, 0, 0, 0),
               ),
             ),
 
@@ -147,31 +146,12 @@ class _CrearInasistenciaState extends State<CrearInasistencia> {
                 hintText: 'Detalles de la solicitud',
                 border: OutlineInputBorder(),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: Color.fromARGB(255, 0, 0, 0),
                 alignLabelWithHint: true,
               ),
             ),
 
             const SizedBox(height: 24),
-
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey[300]!),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: IconButton(
-                onPressed: () {
-                  debugPrint('Seleccionar imagen');
-                },
-                icon: const Icon(
-                  Icons.image,
-                  color: Colors.grey,
-                  size: 30,
-                ),
-              ),
-            ),
 
             const Spacer(),
 
