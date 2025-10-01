@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../models/request-models.dart';
+import '../../models/request/request-models.dart';
+import '../../services/request/history-services.dart';
 import 'historial_view.dart';
 import 'asignados_view.dart';
 import 'seguimientos_view.dart';
-import 'request_edit.dart';
+import 'request_doc.dart'; // ✅ nuevo import
 
 class RequestView extends StatefulWidget {
-  final RequestItem request; // 🔹 Recibe la solicitud
+  final RequestItem request;
 
   const RequestView({Key? key, required this.request}) : super(key: key);
 
@@ -16,9 +17,8 @@ class RequestView extends StatefulWidget {
 }
 
 class _RequestViewState extends State<RequestView> {
-  String selectedTab = "DETALLES"; // pestaña activa por defecto
+  String selectedTab = "DETALLES";
 
-  // 🔹 Función para formatear fechas
   String formatDate(DateTime date) {
     return DateFormat("dd MMM yyyy, hh:mm a").format(date);
   }
@@ -42,13 +42,13 @@ class _RequestViewState extends State<RequestView> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            // --- Selector de pestañas ---
             SegmentedButton<String>(
               segments: const [
                 ButtonSegment(value: "DETALLES", label: Text("DETALLES")),
                 ButtonSegment(value: "HISTORIAL", label: Text("HISTORIAL")),
                 ButtonSegment(value: "ASIGNADOS", label: Text("ASIGNADOS")),
-                ButtonSegment(
-                    value: "SEGUIMIENTOS", label: Text("SEGUIMIENTOS")),
+                ButtonSegment(value: "SEGUIMIENTOS", label: Text("SEGUIMIENTOS")),
               ],
               selected: {selectedTab},
               onSelectionChanged: (Set<String> newSelection) {
@@ -70,9 +70,7 @@ class _RequestViewState extends State<RequestView> {
                   return theme.colorScheme.primary;
                 }),
                 shape: MaterialStateProperty.all(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 ),
                 padding: MaterialStateProperty.all(
                   const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -80,12 +78,11 @@ class _RequestViewState extends State<RequestView> {
               ),
             ),
             const SizedBox(height: 20),
+            // --- Contenido ---
             Expanded(
               child: SingleChildScrollView(
                 child: Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   color: theme.cardColor,
                   margin: const EdgeInsets.all(8),
                   child: Padding(
@@ -98,7 +95,7 @@ class _RequestViewState extends State<RequestView> {
           ],
         ),
       ),
-      floatingActionButton: EditRequestButton(request: widget.request),
+      floatingActionButton: RequestDocButton(request: widget.request), // ✅ cambiado
     );
   }
 
@@ -124,23 +121,18 @@ class _RequestViewState extends State<RequestView> {
           children: [
             _buildDetailRow("Radicado:", req.id, theme),
             Divider(color: theme.dividerColor),
-            _buildDetailRow("Titulo:", req.title ?? "Sin título", theme),
+            _buildDetailRow("Titulo:", req.title.isNotEmpty ? req.title : "Sin título", theme),
             const SizedBox(height: 12),
             Row(
               children: [
                 Text(
                   "Estado:",
-                  style: theme.textTheme.bodyMedium
-                      ?.copyWith(fontWeight: FontWeight.bold),
+                  style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
                 Container(
-                  decoration: BoxDecoration(
-                    color: statusColor,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(color: statusColor, borderRadius: BorderRadius.circular(6)),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   child: Text(
                     req.status,
                     style: theme.textTheme.bodyMedium?.copyWith(
@@ -152,31 +144,26 @@ class _RequestViewState extends State<RequestView> {
               ],
             ),
             const SizedBox(height: 12),
-            _buildDetailRow(
-                "Tipo:", req.typeRequest ?? "otro", theme), // valor por defecto
+            _buildDetailRow("Tipo:", req.typeRequest.isNotEmpty ? req.typeRequest : "otro", theme),
             const SizedBox(height: 12),
-            _buildDetailRow("Desde:", formatDate(req.createdAt), theme),
+            _buildDetailRow("Creado:", formatDate(req.createdAt), theme),
             const SizedBox(height: 12),
-            _buildDetailRow("Hasta:", formatDate(req.updatedAt), theme),
+            _buildDetailRow("Actualizado:", formatDate(req.updatedAt), theme),
             const SizedBox(height: 12),
-            Text(
-              "Descripcion:",
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(fontWeight: FontWeight.bold),
-            ),
+            Text("Descripcion:", style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 6),
             Text(req.infoDx ?? "-", style: theme.textTheme.bodyMedium),
           ],
         );
 
       case "HISTORIAL":
-        return const HistorialView();
+        return HistorialView(requestId: req.id);
 
       case "ASIGNADOS":
-        return const AsignadosView();
+        return AsignadosView(requestId: req.id);
 
       case "SEGUIMIENTOS":
-        return const SeguimientosView();
+        return SeguimientosView(requestId: req.id);
 
       default:
         return const SizedBox();
@@ -187,18 +174,17 @@ class _RequestViewState extends State<RequestView> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label,
-            style: theme.textTheme.bodyMedium
-                ?.copyWith(fontWeight: FontWeight.bold)),
+        Text(label, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
         Flexible(child: Text(value, style: theme.textTheme.bodyMedium)),
       ],
     );
   }
 }
 
-class EditRequestButton extends StatelessWidget {
+// ✅ Nuevo botón para abrir documentos
+class RequestDocButton extends StatelessWidget {
   final RequestItem request;
-  const EditRequestButton({super.key, required this.request});
+  const RequestDocButton({super.key, required this.request});
 
   @override
   Widget build(BuildContext context) {
@@ -210,17 +196,11 @@ class EditRequestButton extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => RequestEdit(
-              title: request.title ?? "Sin título",
-              description: request.infoDx ?? "Sin descripción",
-              type: request.typeRequest ?? "otro",
-              fromDate: request.createdAt,
-              toDate: request.updatedAt,
-            ),
+            builder: (context) => RequestDoc(request: request, documentos: null,),
           ),
         );
       },
-      child: Icon(Icons.edit, color: theme.colorScheme.onPrimary),
+      child: Icon(Icons.description, color: theme.colorScheme.onPrimary),
     );
   }
 }
