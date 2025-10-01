@@ -64,7 +64,6 @@ class _RequestCreatedState extends State<RequestCreated> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Título
                         TextField(
                           controller: _titleController,
                           decoration: const InputDecoration(
@@ -74,7 +73,6 @@ class _RequestCreatedState extends State<RequestCreated> {
                         ),
                         const SizedBox(height: 16),
 
-                        // Tipo de solicitud
                         DropdownButtonFormField<String>(
                           value: _selectedType,
                           decoration: const InputDecoration(
@@ -93,8 +91,6 @@ class _RequestCreatedState extends State<RequestCreated> {
                           },
                         ),
                         const SizedBox(height: 16),
-
-                        // Descripción (opcional)
                         TextField(
                           controller: _descriptionController,
                           maxLines: 4,
@@ -129,7 +125,6 @@ class _RequestCreatedState extends State<RequestCreated> {
               ),
             ),
 
-            // Botón Crear
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -146,7 +141,6 @@ class _RequestCreatedState extends State<RequestCreated> {
                   final requestService = RequestService();
 
                   try {
-                    // Mostrar loading
                     showDialog(
                       context: context,
                       barrierDismissible: false,
@@ -154,27 +148,25 @@ class _RequestCreatedState extends State<RequestCreated> {
                           const Center(child: CircularProgressIndicator()),
                     );
 
-                    // Crear la solicitud
-                    final RequestItem newRequest = await requestService.createRequest(
+                    final RequestItem newRequest =
+                        await requestService.createRequest(
                       title: _titleController.text,
                       typeRequest: _selectedType!,
                       description: _descriptionController.text,
                       file: _selectedFile, createdBy: '', status: '',
                     );
 
-                    Navigator.of(context).pop(); // cerrar loading
+                    Navigator.of(context).pop();
 
-                    // Mensaje de éxito
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text("Solicitud creada: ${newRequest.title}"),
                       ),
                     );
 
-                    // Regresar a la pantalla anterior y forzar recarga
                     Navigator.of(context).pop(true);
                   } catch (e) {
-                    Navigator.of(context).pop(); // cerrar loading
+                    Navigator.of(context).pop();
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text("Error al crear solicitud: $e")),
                     );
