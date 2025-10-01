@@ -8,6 +8,8 @@ import 'data/notifiers.dart'; // renderNotificator, isLoggedIn, useDarkTheme
 import 'theme/custom-themes.dart';
 import 'domain/dio.dart';
 import 'widgets/vacants/vacants.dart';
+import 'widgets/contrato/contrato_view.dart';
+import 'widgets/perfil/perfil.dart';
 
 final api = ApiService(baseUrl: "http://localhost:3000");
 
@@ -29,6 +31,11 @@ class MyApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           theme: lightTheme,
           darkTheme: darkTheme,
+          locale: const Locale("es", "ES"),
+          supportedLocales: const [
+            Locale('en', 'US'),
+            Locale('en', 'GB'),
+          ],
           themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
           home: ValueListenableBuilder<bool>(
             valueListenable: isLoggedIn,
@@ -43,10 +50,12 @@ class MyApp extends StatelessWidget {
                     const Request(),
                     const Vacant(),
                     const Horario(),
-                    const Center(child: Text("Perfil")),
+                    const ContractsPage(),
+                    const Perfil(),
                   ];
 
                   return Scaffold(
+                    backgroundColor: Theme.of(context).primaryColor,
                     body: widgetOptions[selectedIndex],
                     bottomNavigationBar: BottomNavigationBar(
                       showSelectedLabels: false,
@@ -71,9 +80,14 @@ class MyApp extends StatelessWidget {
                           label: 'Horarios',
                         ),
                         BottomNavigationBarItem(
+                          icon: Icon(Icons.description),
+                          label: 'Contratos',
+                        ),
+                        BottomNavigationBarItem(
                           icon: Icon(Icons.person),
                           label: 'Perfil',
                         ),
+                        
                       ],
                       currentIndex: selectedIndex,
                       onTap: (index) {

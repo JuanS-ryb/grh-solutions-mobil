@@ -1,7 +1,11 @@
+import 'package:date_picker_plus/date_picker_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:grhsolutions/data/notifiers.dart';
 import 'package:grhsolutions/models/user/login-model.dart';
 import 'package:grhsolutions/services/user/login-services.dart';
+import 'package:intl/intl.dart';
+import '../../models/documentType/document_type_model.dart';
+import '../../services/documentType/document_type_services.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -19,17 +23,30 @@ class _LoginState extends State<Login> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
       ),
       builder: (context) {
-        return Padding(
-          padding: MediaQuery.of(context).viewInsets,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-            height: 350,
-            decoration: BoxDecoration(
-              color: bg,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-            ),
-            child: const LoginForm(),
-          ),
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.4, // 60% pantalla
+          minChildSize: 0.3,
+          maxChildSize: 0.9,
+          builder: (context, scrollController) {
+            return Container(
+              decoration: BoxDecoration(
+                color: bg,
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(30)),
+              ),
+              child: SingleChildScrollView(
+                controller: scrollController,
+                padding: EdgeInsets.only(
+                  left: 24,
+                  right: 24,
+                  top: 32,
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 32,
+                ),
+                child: const LoginForm(),
+              ),
+            );
+          },
         );
       },
     );
@@ -43,17 +60,30 @@ class _LoginState extends State<Login> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
       ),
       builder: (context) {
-        return Padding(
-          padding: MediaQuery.of(context).viewInsets,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-            height: 400,
-            decoration: BoxDecoration(
-              color: bg,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-            ),
-            child: const RegisterForm(),
-          ),
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.7,
+          minChildSize: 0.3,
+          maxChildSize: 0.95,
+          builder: (context, scrollController) {
+            return Container(
+              decoration: BoxDecoration(
+                color: bg,
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(30)),
+              ),
+              child: SingleChildScrollView(
+                controller: scrollController,
+                padding: EdgeInsets.only(
+                  left: 24,
+                  right: 24,
+                  top: 32,
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 32,
+                ),
+                child: const RegisterForm(),
+              ),
+            );
+          },
         );
       },
     );
@@ -64,12 +94,11 @@ class _LoginState extends State<Login> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).primaryColor,
       body: SafeArea(
         child: Align(
           alignment: Alignment.bottomCenter,
           child: Container(
-            height: 230,
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
             decoration: BoxDecoration(
@@ -87,6 +116,7 @@ class _LoginState extends State<Login> {
               ],
             ),
             child: Column(
+              mainAxisSize: MainAxisSize.min, // 👈 evita overflow
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 const Text(
@@ -110,7 +140,7 @@ class _LoginState extends State<Login> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
                 ElevatedButton.icon(
                   onPressed: () => showRegisterModal(theme.cardColor),
                   icon: Icon(Icons.person_add, color: theme.iconTheme.color),
@@ -168,15 +198,14 @@ class _LoginFormState extends State<LoginForm> {
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
-      debugPrint('Response from endpoint --------------------- $loginResponse.toString()');
-      //ACTUALIZA LAS VARIABLES DEL NOTIFICATOR DE ACUERDO A LA RESPONSE DEL LOGIN.
+      debugPrint(
+          'Response from endpoint --------------------- $loginResponse.toString()');
       isLoggedIn.value = true;
       loginController.value = loginResponse;
 
       if (mounted) {
         Navigator.of(context).pop();
       }
-      
     } catch (e) {
       debugPrint('Error from endpoint --------------------- $e.toString()');
       setState(() {
@@ -197,60 +226,58 @@ class _LoginFormState extends State<LoginForm> {
       valueListenable: isLoggedIn,
       builder: (context, loggedIn, _) {
         return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Iniciar sesión',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Iniciar sesión',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 24),
+            TextField(
+              controller: _emailController,
+              decoration: const InputDecoration(
+                labelText: 'Correo',
+                border: OutlineInputBorder(),
               ),
-              const SizedBox(height: 24),
-              TextField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Correo',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _passwordController,
-                obscureText: !_passwordVisible,
-                decoration: InputDecoration(
-                  labelText: 'Contraseña',
-                  border: const OutlineInputBorder(),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _passwordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _passwordVisible = !_passwordVisible;
-                      });
-                    },
+              keyboardType: TextInputType.emailAddress,
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _passwordController,
+              obscureText: !_passwordVisible,
+              decoration: InputDecoration(
+                labelText: 'Contraseña',
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _passwordVisible ? Icons.visibility : Icons.visibility_off,
                   ),
+                  onPressed: () {
+                    setState(() {
+                      _passwordVisible = !_passwordVisible;
+                    });
+                  },
                 ),
               ),
-              const SizedBox(height: 24),
+            ),
+            const SizedBox(height: 24),
             if (_error != null)
               Text(
                 _error!,
                 style: const TextStyle(color: Colors.red),
               ),
             const SizedBox(height: 8),
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
                 onPressed: _loading ? null : handleLogin,
                 child: _loading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text('Login', style: theme.textTheme.bodyMedium),
-                ),
               ),
-            ],
+            ),
+          ],
         );
       },
     );
@@ -268,92 +295,304 @@ class RegisterForm extends StatefulWidget {
 }
 
 class _RegisterFormState extends State<RegisterForm> {
+  final _formKey = GlobalKey<FormState>();
+
+  // Controladores
+  final _firstNameController = TextEditingController();
+  final _secondNameController = TextEditingController();
+  final _firstLastNameController = TextEditingController();
+  final _secondLastNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _docNumberController = TextEditingController();
+
   bool _passwordVisible = false;
   bool _confirmPasswordVisible = false;
+  DateTime? _birthDate;
+  List<DocumentType> _documentTypes = [];
+  String? _selectedDocumentId;
 
   @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    _loadDocumentTypes();
+  }
+
+  Future<void> _loadDocumentTypes() async {
+    final service = DocumentService();
+    try {
+      final docs = await service.getDocumentTypes();
+      setState(() {
+        _documentTypes = docs;
+      });
+    } catch (e) {
+      debugPrint("Error cargando tipos de documento: $e");
+    }
+  }
+
+  DateTime _clampDate(DateTime date, DateTime min, DateTime max) {
+    if (date.isBefore(min)) return min;
+    if (date.isAfter(max)) return max;
+    return date;
+  }
+
+  void _pickBirthDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: now,
+      firstDate: DateTime(1900),
+      lastDate: now,
+      locale: const Locale("es", "ES"),
+    );
+
+    if (picked != null) {
+      setState(() {
+        _birthDate = picked;
+      });
+    }
   }
 
   void _register() {
-    if (_passwordController.text == _confirmPasswordController.text) {
-      debugPrint(
-        'Registrar con: ${_emailController.text} / ${_passwordController.text}',
-      );
-      Navigator.of(context).pop();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Las contraseñas no coinciden')),
-      );
+    if (_formKey.currentState!.validate()) {
+      final data = {
+        "primerNombre": _firstNameController.text.trim(),
+        "segundoNombre": _secondNameController.text.trim(),
+        "primerApellido": _firstLastNameController.text.trim(),
+        "segundoApellido": _secondLastNameController.text.trim(),
+        "correo": _emailController.text.trim(),
+        "password": _passwordController.text.trim(),
+        "tipoDocumento": _selectedDocumentId,
+        "numeroDocumento": _docNumberController.text.trim(),
+        "fechaNacimiento": _birthDate?.toIso8601String(),
+      };
+
+      debugPrint("Datos a registrar: $data");
+
+      // Aquí haces tu request POST al backend
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Registrarse',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 24),
-          TextField(
-            controller: _emailController,
-            decoration: const InputDecoration(
-              labelText: 'Correo',
-              border: OutlineInputBorder(),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Registrarse',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 24),
+
+            // Nombres
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _firstNameController,
+                    decoration: const InputDecoration(
+                        labelText: 'Primer Nombre',
+                        border: OutlineInputBorder()),
+                    validator: (v) => v!.isEmpty ? "Campo requerido" : null,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextFormField(
+                    controller: _secondNameController,
+                    decoration: const InputDecoration(
+                        labelText: 'Segundo Nombre',
+                        border: OutlineInputBorder()),
+                  ),
+                ),
+              ],
             ),
-            keyboardType: TextInputType.emailAddress,
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _passwordController,
-            obscureText: !_passwordVisible,
-            decoration: InputDecoration(
-              labelText: 'Contraseña',
-              border: const OutlineInputBorder(),
-              suffixIcon: IconButton(
-                icon: Icon(
-                    _passwordVisible ? Icons.visibility : Icons.visibility_off),
-                onPressed: () =>
-                    setState(() => _passwordVisible = !_passwordVisible),
+            const SizedBox(height: 16),
+
+            // Apellidos
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _firstLastNameController,
+                    decoration: const InputDecoration(
+                        labelText: 'Primer Apellido',
+                        border: OutlineInputBorder()),
+                    validator: (v) => v!.isEmpty ? "Campo requerido" : null,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextFormField(
+                    controller: _secondLastNameController,
+                    decoration: const InputDecoration(
+                        labelText: 'Segundo Apellido',
+                        border: OutlineInputBorder()),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Email
+            TextFormField(
+              controller: _emailController,
+              decoration: const InputDecoration(
+                  labelText: 'Correo Electrónico',
+                  border: OutlineInputBorder()),
+              keyboardType: TextInputType.emailAddress,
+              validator: (v) {
+                if (v == null || v.isEmpty) return "Campo requerido";
+                final regex = RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$");
+                return !regex.hasMatch(v) ? "Correo inválido" : null;
+              },
+            ),
+            const SizedBox(height: 16),
+
+            // Contraseña
+            TextFormField(
+              controller: _passwordController,
+              obscureText: !_passwordVisible,
+              decoration: InputDecoration(
+                labelText: 'Contraseña',
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: Icon(_passwordVisible
+                      ? Icons.visibility
+                      : Icons.visibility_off),
+                  onPressed: () =>
+                      setState(() => _passwordVisible = !_passwordVisible),
+                ),
+              ),
+              validator: (v) => v!.length < 6 ? "Mínimo 6 caracteres" : null,
+            ),
+            const SizedBox(height: 16),
+
+            // Confirmar contraseña
+            TextFormField(
+              controller: _confirmPasswordController,
+              obscureText: !_confirmPasswordVisible,
+              decoration: InputDecoration(
+                labelText: 'Confirmar Contraseña',
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: Icon(_confirmPasswordVisible
+                      ? Icons.visibility
+                      : Icons.visibility_off),
+                  onPressed: () => setState(
+                      () => _confirmPasswordVisible = !_confirmPasswordVisible),
+                ),
+              ),
+              validator: (v) => v != _passwordController.text
+                  ? "Las contraseñas no coinciden"
+                  : null,
+            ),
+            const SizedBox(height: 16),
+
+            // Tipo de documento
+            DropdownButtonFormField<String>(
+              initialValue: _selectedDocumentId,
+              decoration: const InputDecoration(
+                labelText: "Tipo de Documento",
+                border: OutlineInputBorder(),
+              ),
+              items: _documentTypes.map((doc) {
+                return DropdownMenuItem<String>(
+                  value: doc.id,
+                  child: Text(doc.name),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _selectedDocumentId = value;
+                });
+              },
+              validator: (value) =>
+                  value == null ? "Seleccione un tipo de documento" : null,
+            ),
+            const SizedBox(height: 16),
+
+            // Número documento
+            TextFormField(
+              controller: _docNumberController,
+              decoration: const InputDecoration(
+                  labelText: 'Número de documento',
+                  border: OutlineInputBorder()),
+              keyboardType: TextInputType.number,
+              validator: (v) => v!.isEmpty ? "Campo requerido" : null,
+            ),
+            const SizedBox(height: 16),
+
+// Fecha nacimiento
+            InkWell(
+              onTap: () async {
+                final today = DateTime.now();
+                final minDate = DateTime(1900);
+                // si ya tienes un _birthDate, lo aseguras dentro del rango; si no, úsalo por defecto en today
+                final initial = _birthDate == null
+                    ? today
+                    : _clampDate(_birthDate!, minDate, today);
+
+                final picked = await showDatePickerDialog(
+                  context: context,
+                  initialDate: initial,
+                  minDate: minDate,
+                  maxDate: today, // <-- evita fechas futuras dinámicamente
+                  currentDateDecoration: const BoxDecoration(),
+                  currentDateTextStyle: const TextStyle(),
+                  daysOfTheWeekTextStyle: const TextStyle(),
+                  disabledCellsTextStyle: const TextStyle(),
+                  enabledCellsDecoration: const BoxDecoration(),
+                  enabledCellsTextStyle: const TextStyle(),
+                  initialPickerType: PickerType.days,
+                  selectedCellDecoration: const BoxDecoration(),
+                  selectedCellTextStyle: const TextStyle(),
+                  leadingDateTextStyle: const TextStyle(),
+                );
+
+                if (picked != null) {
+                  // validación extra por si acaso
+                  if (picked.isAfter(today)) {
+                    // nunca debería ocurrir porque maxDate = today, pero por seguridad:
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content:
+                              Text('No puede seleccionar una fecha futura')),
+                    );
+                    return;
+                  }
+
+                  setState(() {
+                    _birthDate = picked;
+                  });
+                }
+              },
+              child: InputDecorator(
+                decoration: const InputDecoration(
+                  labelText: 'Fecha de nacimiento',
+                  border: OutlineInputBorder(),
+                ),
+                child: Text(
+                  _birthDate == null
+                      ? "Seleccione una fecha"
+                      : DateFormat("dd/MM/yyyy").format(_birthDate!),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _confirmPasswordController,
-            obscureText: !_confirmPasswordVisible,
-            decoration: InputDecoration(
-              labelText: 'Confirmar contraseña',
-              border: const OutlineInputBorder(),
-              suffixIcon: IconButton(
-                icon: Icon(
-                    _confirmPasswordVisible ? Icons.visibility : Icons.visibility_off),
-                onPressed: () => setState(
-                    () => _confirmPasswordVisible = !_confirmPasswordVisible),
+            const SizedBox(height: 24),
+
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: _register,
+                child: const Text('Registrar'),
               ),
             ),
-          ),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton(
-              onPressed: _register,
-              child: const Text('Registrar'),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
