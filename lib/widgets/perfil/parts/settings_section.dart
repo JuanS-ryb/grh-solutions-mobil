@@ -19,6 +19,7 @@ class _SettingsScreenState extends State<SettingsScreen>
         valueListenable: useDarkTheme,
         builder: (context, isDark, _) {
           return SettingsList(
+            applicationType: ApplicationType.material,
             darkTheme: settingsDarkTheme,
             lightTheme: settingsLightTheme,
             contentPadding: const EdgeInsets.all(2),
