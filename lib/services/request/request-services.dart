@@ -8,6 +8,7 @@ class RequestService {
   final Http _http = Http();
   final String baseEndpoint = "/request";
 
+  /// Obtener todas las solicitudes
   Future<List<RequestItem>> getRequests() async {
     try {
       final Response response = await _http.get('$baseEndpoint/getAll');
@@ -39,33 +40,39 @@ class RequestService {
     required String title,
     required String typeRequest,
     String? description,
-    PlatformFile? file, required String createdBy, required String status,
+    required String createdBy,
+    required String status,
+    List<PlatformFile>? files, // ✅ CAMBIO AQUÍ
   }) async {
     try {
-      List<Map<String, dynamic>> fileData = [];
-      if (file != null) {
-        final base64File = base64Encode(file.bytes!);
-        fileData = [
-          {
+      // Convertir los archivos seleccionados a base64
+      List<Map<String, dynamic>> filesBase64 = [];
+
+      if (files != null && files.isNotEmpty) {
+        filesBase64 = files.map((file) {
+          final base64File = base64Encode(file.bytes!);
+          return {
             "id": DateTime.now().millisecondsSinceEpoch.toString(),
             "name": file.name,
             "type": file.extension ?? '',
             "size": file.size,
             "base64": base64File,
-          }
-        ];
+          };
+        }).toList();
       }
 
+      // Crear el cuerpo de la solicitud
       final payload = {
+        "createdBy": createdBy,
         "title": title,
+        "status": status,
         "type_request": typeRequest,
         if (description != null && description.isNotEmpty) "infoDx": description,
-        if (fileData.isNotEmpty) "file": fileData,
+        if (filesBase64.isNotEmpty) "file": filesBase64,
       };
 
       final Response response = await _http.post('$baseEndpoint/create', data: payload);
 
-      // Retornamos el objeto creado
       if (response.data != null && response.data is Map<String, dynamic>) {
         return RequestItem.fromJson(response.data);
       } else {

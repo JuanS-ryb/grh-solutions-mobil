@@ -14,7 +14,7 @@ class _RequestCreatedState extends State<RequestCreated> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   String? _selectedType;
-  PlatformFile? _selectedFile;
+  List<PlatformFile> _selectedFiles = []; // ✅ ahora puede tener varios archivos
 
   final List<String> tiposSolicitud = [
     "Vacaciones",
@@ -93,7 +93,7 @@ class _RequestCreatedState extends State<RequestCreated> {
                         const SizedBox(height: 16),
                         TextField(
                           controller: _descriptionController,
-                          maxLines: 4,
+                          maxLines: 2,
                           decoration: const InputDecoration(
                             labelText: "Descripción (opcional)",
                             hintText: "Detalles de la solicitud",
@@ -101,23 +101,71 @@ class _RequestCreatedState extends State<RequestCreated> {
                         ),
                         const SizedBox(height: 16),
 
-                        // Archivo (opcional)
+                        // 📎 Selección de archivos PDF
                         ElevatedButton.icon(
                           onPressed: () async {
-                            final result = await FilePicker.platform.pickFiles();
-                            if (result != null) {
+                            final result = await FilePicker.platform.pickFiles(
+                              allowMultiple: true, // ✅ Permitir varios
+                              type: FileType.custom,
+                              allowedExtensions: ['pdf'], // ✅ Solo PDF
+                            );
+
+                            if (result != null && result.files.isNotEmpty) {
+                              final invalidFiles = result.files.where(
+                                (f) => f.extension?.toLowerCase() != 'pdf',
+                              );
+
+                              if (invalidFiles.isNotEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      "Solo se permiten archivos PDF.",
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
+
+                              if (result.files.length > 2) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      "Solo puedes subir hasta 2 archivos PDF.",
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
+
                               setState(() {
-                                _selectedFile = result.files.first;
+                                _selectedFiles = result.files;
                               });
                             }
                           },
                           icon: const Icon(Icons.attach_file),
                           label: Text(
-                            _selectedFile != null
-                                ? _selectedFile!.name
-                                : "Adjuntar archivo (opcional)",
+                            _selectedFiles.isNotEmpty
+                                ? "${_selectedFiles.length} archivo(s) seleccionado(s)"
+                                : "Adjuntar archivos PDF (máx. 2)",
                           ),
                         ),
+
+                        if (_selectedFiles.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            children: _selectedFiles.map((file) {
+                              return Chip(
+                                label: Text(file.name),
+                                onDeleted: () {
+                                  setState(() {
+                                    _selectedFiles.remove(file);
+                                  });
+                                },
+                              );
+                            }).toList(),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -125,6 +173,7 @@ class _RequestCreatedState extends State<RequestCreated> {
               ),
             ),
 
+            // 📤 Botón de envío
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -132,7 +181,7 @@ class _RequestCreatedState extends State<RequestCreated> {
                   if (_titleController.text.isEmpty || _selectedType == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text("Debe ingresar título y tipo de solicitud"),
+                        content: Text("Debe ingresar título y tipo de solicitud."),
                       ),
                     );
                     return;
@@ -153,7 +202,9 @@ class _RequestCreatedState extends State<RequestCreated> {
                       title: _titleController.text,
                       typeRequest: _selectedType!,
                       description: _descriptionController.text,
-                      file: _selectedFile, createdBy: '', status: '',
+                      files: _selectedFiles, // ✅ ahora enviamos lista de PDFs
+                      createdBy: '', // TODO: reemplazar con usuario actual
+                      status: 'pendiente',
                     );
 
                     Navigator.of(context).pop();
