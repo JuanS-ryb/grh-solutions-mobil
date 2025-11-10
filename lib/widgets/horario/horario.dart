@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:grhsolutions/services/horarios/horario-services.dart';
+import 'package:grhsolutions/services/request/request-services.dart';
 import 'package:grhsolutions/widgets/horario/inasistencia.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -14,88 +15,79 @@ class _HorarioState extends State<Horario> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   final HorarioService horarioService = HorarioService();
+  final RequestService requestService = RequestService();
 
   String grupo = '';
   Map<DateTime, String> horarios = {};
+  Map<DateTime, bool> inasistencias = {};
   String horarioGeneral = '';
 
   @override
   void initState() {
     super.initState();
-    cargarHorarios();
+    cargarHorariosYRequests();
   }
 
-  Future<void> cargarHorarios() async {
+  Future<void> cargarHorariosYRequests() async {
     try {
       final List res = await horarioService.getHorarios();
 
       final Map<DateTime, String> mapaHorarios = {};
       String nombreGrupo = '';
 
-      print('=== DEBUG: Total horarios recibidos: ${res.length} ===');
-
       for (final h in res) {
-        print('rocesando horario ');
-        print('Id: ${h.id}');
-        print('startDate (String): "${h.startDate}"');
-        print('scheduleType: ${h.scheduleType?.name}');
-        print('group: ${h.group?.name}');
+        if (h.startDate == null || h.startDate.isEmpty) continue;
 
-        if (h.startDate.isEmpty) {
-          print(' Saltando: startDate está vacío');
-          continue;
-        }
-
-        DateTime fechaInicio;
         try {
-          fechaInicio = DateTime.parse(h.startDate).toLocal();
-          print(' Fecha parseada: $fechaInicio');
-        } catch (err) {
-          print('Error parseando fecha "${h.startDate}": $err');
+          final fechaInicio = DateTime.parse(h.startDate).toLocal();
+          final key =
+              DateTime(fechaInicio.year, fechaInicio.month, fechaInicio.day);
+
+          String tipo = h.scheduleType?.name ?? '';
+          if (tipo.isNotEmpty) horarioGeneral = tipo;
+
+          mapaHorarios[key] = tipo;
+
+          if (h.group?.name != null && h.group!.name.isNotEmpty) {
+            nombreGrupo = h.group!.name;
+          }
+        } catch (e) {
+          print('❌ Error al convertir fecha: $e');
           continue;
-        }
-
-        final key = DateTime(fechaInicio.year, fechaInicio.month, fechaInicio.day);
-        print(' Clave generada: $key');
-
-        String tipo = '';
-        if (h.scheduleType?.name != null && h.scheduleType!.name.isNotEmpty) {
-          tipo = h.scheduleType!.name;
-          horarioGeneral = tipo;
-        }
-        print('Tipo horario: "$tipo"');
-
-        mapaHorarios[key] = tipo;
-
-        if (h.group?.name != null && h.group!.name.isNotEmpty) {
-          nombreGrupo = h.group!.name;
-          print(' Grupo: $nombreGrupo');
         }
       }
+      final requests = await requestService.getRequests();
+      final Map<DateTime, bool> mapaInasistencias = {};
 
-      print('Horarios mapeados: ${mapaHorarios.length}');
-      mapaHorarios.forEach((fecha, tipo) {
-        print('$fecha -> "$tipo"');
-      });
-      print('Grupo: "$nombreGrupo"');
+      for (final req in requests) {
+        if ((req.typeRequest ?? '').toLowerCase().contains('inasistencia')) {
+          final fechaKey = DateTime(
+            req.createdAt.toLocal().year,
+            req.createdAt.toLocal().month,
+            req.createdAt.toLocal().day,
+          );
+
+          // Guardar la fecha en el mapa
+          mapaInasistencias[fechaKey] = true;
+        }
+      }
 
       if (mounted) {
         setState(() {
-          horarios = mapaHorarios;
-          grupo = nombreGrupo;
+          inasistencias = mapaInasistencias;
         });
-        print(' Horario general "$horarioGeneral"');
       }
-    } catch (e, st) {
-      print('Stack trace: $st');
+
+    } catch (e, stack) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error al cargar horarios: $e')));
+          SnackBar(content: Text('Error al cargar datos: $e')),
+        );
       }
     }
   }
 
-  void _navegarACrearInasistencia() {
+  Future<void> _navegarACrearInasistencia() async {
     if (_selectedDay == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -106,17 +98,17 @@ class _HorarioState extends State<Horario> {
       return;
     }
 
-    final claveSeleccionada = DateTime(
-      _selectedDay!.year,
-      _selectedDay!.month,
-      _selectedDay!.day,
-    );
+    final claveSeleccionada =
+        DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day);
 
     final horarioSeleccionado = horarios[claveSeleccionada];
-    print('Día seleccionado: $claveSeleccionada');
-    print('Horario encontrado: "$horarioSeleccionado"');
 
-    Navigator.push(
+    // Actualizar inasistencias antes de navegar
+    setState(() {
+      inasistencias[claveSeleccionada] = true;
+    });
+
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => CrearInasistencia(
@@ -130,7 +122,7 @@ class _HorarioState extends State<Horario> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    final theme = Theme.of(context);
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -165,15 +157,11 @@ class _HorarioState extends State<Horario> {
               formatButtonVisible: false,
               titleCentered: true,
             ),
-            calendarStyle: CalendarStyle(
-              todayDecoration: const BoxDecoration(
+            calendarStyle: const CalendarStyle(
+              todayDecoration: BoxDecoration(
                   color: Colors.blueAccent, shape: BoxShape.circle),
-              selectedDecoration: const BoxDecoration(
-                  color: Colors.blue, shape: BoxShape.circle),
-              defaultTextStyle: TextStyle(
-                color: Theme.of(context).textTheme.labelSmall?.color ??
-                    Colors.black, // Usamos tu color personalizado
-              ),
+              selectedDecoration:
+                  BoxDecoration(color: Colors.blue, shape: BoxShape.circle),
             ),
             rowHeight: 80,
             onDaySelected: (selectedDay, focusedDay) {
@@ -181,11 +169,6 @@ class _HorarioState extends State<Horario> {
                 _selectedDay = selectedDay;
                 _focusedDay = focusedDay;
               });
-
-              final clave = DateTime(
-                  selectedDay.year, selectedDay.month, selectedDay.day);
-              print('Día seleccionado: $clave');
-              print('Horario: "${horarios[clave]}"');
             },
             calendarBuilders: CalendarBuilders(
               defaultBuilder: (context, day, focusedDay) => _buildDayCell(day),
@@ -219,49 +202,64 @@ class _HorarioState extends State<Horario> {
   Widget _buildDayCell(DateTime day,
       {bool isToday = false, bool isSelected = false}) {
     final clave = DateTime(day.year, day.month, day.day);
+    final bool tieneInasistencia = inasistencias.containsKey(clave);
+    final bool esHoy = isSameDay(day, DateTime.now());
 
-    String? horario = horarios[clave];
-    if (horario == null || horario.isEmpty) {
-      horario = horarioGeneral;
-    }
+    String? horario = horarios[clave] ?? horarioGeneral;
 
-    return Container(
-      margin: const EdgeInsets.all(2),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        // Fondo para inasistencia (rojo) excepto hoy
+        if (tieneInasistencia && !esHoy)
           Container(
-            width: 36,
-            height: 36,
+            width: 40,
+            height: 40,
+            decoration: const BoxDecoration(
+              color: Colors.redAccent,
+              shape: BoxShape.circle,
+            ),
+          ),
+
+        // Fondo para hoy o seleccionado (si no tiene inasistencia o es hoy)
+        if (!tieneInasistencia || esHoy)
+          Container(
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
               color: isSelected
                   ? Colors.blue
                   : isToday
                       ? Colors.blueAccent
                       : Colors.transparent,
-              borderRadius: BorderRadius.circular(8),
+              shape: BoxShape.circle,
             ),
-            alignment: Alignment.center,
-            child: Text('${day.day}',
-                style: TextStyle(
-                    color: isSelected || isToday
-                        ? Colors.white
-                        : Theme.of(context).textTheme.labelSmall?.color ??
-                            Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14)),
           ),
-          const SizedBox(height: 2),
-          Container(
-            height: 16,
+
+        // Número del día
+        Text(
+          '${day.day}',
+          style: TextStyle(
+            color: (tieneInasistencia && !esHoy) || isSelected || isToday
+                ? Colors.white
+                : Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+        ),
+
+        // Horario debajo del número
+        Positioned(
+          bottom: -2,
+          child: SizedBox(
+            width: 40,
             child: Text(
               horario ?? "",
               style: TextStyle(
                 fontSize: 9,
                 color: (horario != null && horario.isNotEmpty)
                     ? Colors.blue
-                    : Theme.of(context).textTheme.labelSmall?.color ??
-                        Colors.grey, // Usamos tu color
+                    : Colors.grey,
                 fontWeight: (horario != null && horario.isNotEmpty)
                     ? FontWeight.w500
                     : FontWeight.normal,
@@ -271,8 +269,8 @@ class _HorarioState extends State<Horario> {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

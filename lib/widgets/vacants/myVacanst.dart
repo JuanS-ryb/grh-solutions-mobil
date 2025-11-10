@@ -3,7 +3,6 @@ import 'package:grhsolutions/services/vacants/get-my-vacants.dart';
 import 'package:grhsolutions/models/vacants/get-my-modal.dart';
 import 'package:grhsolutions/widgets/vacants/buildStatusCircle.dart';
 import 'package:grhsolutions/widgets/vacants/viewVacants.dart';
-import '../base_scaffold.dart';
 import '../../data/notifiers.dart';
 
 class myVacant extends StatefulWidget {
@@ -23,15 +22,13 @@ class _myVacantState extends State<myVacant> {
   @override
   void initState() {
     super.initState();
-    debugPrint(loginController.value?.user?.id);
     final String? id = loginController.value?.user?.id;
-    debugPrint(id);
     _futureVacants = service.getMyVacants(id!);
   }
 
   @override
   Widget build(BuildContext context) {
-    return BaseScaffold(
+    return Scaffold(
       appBar: AppBar(
         leading: const BackButton(),
         elevation: 0,

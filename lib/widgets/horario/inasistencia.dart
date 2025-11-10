@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:grhsolutions/services/horarios/request-services.dart';
 import 'package:intl/intl.dart';
 
 class CrearInasistencia extends StatefulWidget {
@@ -20,6 +21,8 @@ class CrearInasistencia extends StatefulWidget {
 class _CrearInasistenciaState extends State<CrearInasistencia> {
   final TextEditingController _tituloController = TextEditingController();
   final TextEditingController _descripcionController = TextEditingController();
+  final RequestService _requestService = RequestService(); // 👈 tu servicio
+  bool _enviando = false;
 
   @override
   void dispose() {
@@ -28,7 +31,7 @@ class _CrearInasistenciaState extends State<CrearInasistencia> {
     super.dispose();
   }
 
-  void _crearInasistencia() {
+  Future<void> _crearInasistencia() async {
     if (_tituloController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -39,26 +42,42 @@ class _CrearInasistenciaState extends State<CrearInasistencia> {
       return;
     }
 
-    debugPrint('Fecha: ${widget.fechaSeleccionada}');
-    debugPrint('Horario: ${widget.horario}');
-    debugPrint('Grupo: ${widget.grupo}');
-    debugPrint('Título: ${_tituloController.text}');
-    debugPrint('Descripción: ${_descripcionController.text}');
+    setState(() => _enviando = true);
+    try {
+      final nuevaInasistencia = await _requestService.createRequest(
+        title: _tituloController.text.trim(),
+        typeRequest: "inasistencia",
+        description: _descripcionController.text.trim(),
+        createdBy: "",
+        status: "PENDIENTE",
+        files: null,
+        createdAt: widget.fechaSeleccionada, // DateTime
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Inasistencia creada exitosamente'),
+          backgroundColor: Colors.green,
+        ),
+      );
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Inasistencia creada exitosamente'),
-        backgroundColor: Colors.green,
-      ),
-    );
-
-    Navigator.pop(context);
+      Navigator.pop(context, true);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al crear inasistencia: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() => _enviando = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final String fechaFormateada = DateFormat('dd/MM/yyyy').format(widget.fechaSeleccionada);
-    
+    final String fechaFormateada =
+        DateFormat('dd/MM/yyyy').format(widget.fechaSeleccionada);
+
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
@@ -68,14 +87,20 @@ class _CrearInasistenciaState extends State<CrearInasistencia> {
         elevation: 0,
         actions: [
           TextButton(
-            onPressed: _crearInasistencia,
-            child: const Text(
-              'Crear',
-              style: TextStyle(
-                color: Colors.blue,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            onPressed: _enviando ? null : _crearInasistencia,
+            child: _enviando
+                ? const SizedBox(
+                    height: 16,
+                    width: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text(
+                    'Crear',
+                    style: TextStyle(
+                      color: Colors.blue,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
           ),
         ],
       ),
@@ -88,7 +113,7 @@ class _CrearInasistenciaState extends State<CrearInasistencia> {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 0, 149, 255),
+                color: const Color(0xFF0095FF),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
@@ -99,24 +124,20 @@ class _CrearInasistenciaState extends State<CrearInasistencia> {
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
+                      color: Colors.white,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Grupo: ${widget.grupo}',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Color.fromARGB(255, 255, 255, 255),
-                    ),
+                    style: const TextStyle(fontSize: 14, color: Colors.white),
                   ),
                   if (widget.horario != null) ...[
                     const SizedBox(height: 4),
                     Text(
                       'Horario: ${widget.horario}',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Color.fromARGB(255, 249, 249, 249),
-                      ),
+                      style:
+                          const TextStyle(fontSize: 14, color: Colors.white70),
                     ),
                   ],
                 ],
@@ -125,6 +146,7 @@ class _CrearInasistenciaState extends State<CrearInasistencia> {
 
             const SizedBox(height: 24),
 
+            // Campo título
             TextField(
               controller: _tituloController,
               decoration: const InputDecoration(
@@ -132,21 +154,23 @@ class _CrearInasistenciaState extends State<CrearInasistencia> {
                 hintText: 'Nombre de la solicitud',
                 border: OutlineInputBorder(),
                 filled: true,
-                fillColor: Color.fromARGB(255, 0, 0, 0),
+                fillColor: Colors.white,
               ),
             ),
 
             const SizedBox(height: 16),
 
+            // Campo descripción
             TextField(
               controller: _descripcionController,
               maxLines: 5,
               decoration: const InputDecoration(
                 labelText: 'Descripción:',
-                hintText: 'Detalles de la solicitud',
+                hintText:
+                    'Detalles de la solicitud o motivo de la inasistencia',
                 border: OutlineInputBorder(),
                 filled: true,
-                fillColor: Color.fromARGB(255, 0, 0, 0),
+                fillColor: Colors.white,
                 alignLabelWithHint: true,
               ),
             ),
@@ -159,7 +183,7 @@ class _CrearInasistenciaState extends State<CrearInasistencia> {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: _crearInasistencia,
+                onPressed: _enviando ? null : _crearInasistencia,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   foregroundColor: Colors.white,
@@ -167,13 +191,18 @@ class _CrearInasistenciaState extends State<CrearInasistencia> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: const Text(
-                  'Crear Inasistencia',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                child: _enviando
+                    ? const CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      )
+                    : const Text(
+                        'Crear Inasistencia',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
               ),
             ),
           ],
