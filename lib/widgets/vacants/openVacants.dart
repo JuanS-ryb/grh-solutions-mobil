@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:grhsolutions/widgets/vacants/viewVacants.dart';
 import 'package:grhsolutions/services/vacants/get-vacants.dart';
 import 'package:grhsolutions/models/vacants/get-model.dart';
-import '../base_scaffold.dart';
-
 class OpenVacants extends StatefulWidget {
   final String name;
   final bool isRemote;
@@ -30,7 +28,9 @@ class _OpenVacantsState extends State<OpenVacants> {
 
   Future<void> _loadVacants() async {
     try {
-      final response = await _service.getVacants();
+      final response = await _service.getVacants(
+          title: widget.name, isRemoto: widget.isRemote);
+
       setState(() {
         vacants = response.vacants;
         isLoading = false;
@@ -52,7 +52,7 @@ class _OpenVacantsState extends State<OpenVacants> {
     }
 
     if (errorMsg != null) {
-      return BaseScaffold(
+      return Scaffold(
         appBar: AppBar(
           leading: const BackButton(),
           title: const Text("Vacantes"),
@@ -62,16 +62,16 @@ class _OpenVacantsState extends State<OpenVacants> {
     }
 
     if (vacants.isEmpty) {
-      return BaseScaffold(
+      return Scaffold(
         appBar: AppBar(
           leading: const BackButton(),
           title: const Text("Vacantes"),
         ),
-        body: const Center(child: Text("No hay vacantes disponibles")),
+        body: const Center(child: Text("No se muestran vacantes sin relación o inexistentes.")),
       );
     }
 
-    return BaseScaffold(
+    return Scaffold(
       appBar: AppBar(
         leading: const BackButton(),
         elevation: 0,
@@ -136,7 +136,8 @@ class _OpenVacantsState extends State<OpenVacants> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ViewVacants(id: item.id, isMyVacant: false),
+                          builder: (context) =>
+                              ViewVacants(id: item.id, isMyVacant: false),
                         ),
                       );
                     },

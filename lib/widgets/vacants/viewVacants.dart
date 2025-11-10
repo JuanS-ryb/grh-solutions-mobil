@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:grhsolutions/services/vacants/relation-vacants.dart';
-import '../base_scaffold.dart';
 import 'package:grhsolutions/models/vacants/get-model.dart';
 import 'package:grhsolutions/services/vacants/get-vacant-id.dart';
 
@@ -48,7 +47,7 @@ class _ViewVacantsState extends State<ViewVacants> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return BaseScaffold(
+      return Scaffold(
         appBar: AppBar(
           leading: const BackButton(),
           title: Text("Detalle de vacante"),
@@ -58,7 +57,7 @@ class _ViewVacantsState extends State<ViewVacants> {
     }
 
     if (errorMessage != null || selectedVacant == null) {
-      return BaseScaffold(
+      return Scaffold(
         appBar: AppBar(
           leading: const BackButton(),
           title: const Text("Detalle de vacante"),
@@ -67,7 +66,7 @@ class _ViewVacantsState extends State<ViewVacants> {
       );
     }
 
-    return BaseScaffold(
+    return Scaffold(
       appBar: AppBar(
         leading: const BackButton(),
         elevation: 0,

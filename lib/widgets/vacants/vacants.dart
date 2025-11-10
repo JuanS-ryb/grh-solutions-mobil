@@ -12,6 +12,9 @@ class Vacant extends StatefulWidget {
 class _VacantState extends State<Vacant> {
   final TextEditingController _controller = TextEditingController();
   bool _isRemote = false;
+  String? _errorText;
+
+  final RegExp _validPattern = RegExp(r'^[a-zA-Z0-9áéíóúÁÉÍÓÚüÜñÑ\s.,-]+$');
 
   void _myVacants() {
     Navigator.push(
@@ -21,11 +24,32 @@ class _VacantState extends State<Vacant> {
   }
 
   void _searchVacants() {
+    final text = _controller.text.trim();
+
+    setState(() {
+      _errorText = null; // limpia error anterior
+    });
+
+    if (text.isEmpty) {
+      setState(() {
+        _errorText = "Por favor ingresa un término de búsqueda.";
+      });
+      return;
+    }
+
+    if (!_validPattern.hasMatch(text)) {
+      setState(() {
+        _errorText = "El término de búsqueda contiene caracteres no válidos.";
+      });
+      return;
+    }
+
+    // Si todo está bien, navega
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => OpenVacants(
-          name: _controller.text,
+          name: text,
           isRemote: _isRemote,
         ),
       ),
@@ -57,7 +81,7 @@ class _VacantState extends State<Vacant> {
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: Color.fromARGB(255, 0, 0, 0),
+                              color: Colors.black,
                             ),
                           ),
                           const SizedBox(height: 15),
@@ -66,20 +90,25 @@ class _VacantState extends State<Vacant> {
                           TextField(
                             controller: _controller,
                             decoration: InputDecoration(
-                              hintText: 'Programador móvil',
+                              hintText: 'Ej: Programador móvil',
                               suffixIcon: IconButton(
                                 icon: const Icon(Icons.clear),
                                 onPressed: () {
-                                  _controller.clear();
+                                  setState(() {
+                                    _controller.clear();
+                                    _errorText = null; // limpia error al borrar
+                                  });
                                 },
                               ),
                               filled: true,
+                              errorText: _errorText,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(30),
                                 borderSide: BorderSide.none,
                               ),
                             ),
                           ),
+
                           const SizedBox(height: 15),
 
                           // Switch remoto
@@ -132,8 +161,6 @@ class _VacantState extends State<Vacant> {
                 ),
               ),
 
-              const SizedBox(height: 30),
-
               // Botón ver postulaciones
               SizedBox(
                 width: double.infinity,
@@ -152,7 +179,7 @@ class _VacantState extends State<Vacant> {
                   ),
                 ),
               ),
-              const SizedBox(height: 20), // Espaciado inferior
+              const SizedBox(height: 20),
             ],
           ),
         ),
