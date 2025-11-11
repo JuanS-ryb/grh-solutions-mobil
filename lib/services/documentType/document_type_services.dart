@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'package:flutter/cupertino.dart';
 import 'package:dio/dio.dart';
 import '../../models/documentType/document_type_model.dart';
 

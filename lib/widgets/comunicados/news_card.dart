@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'news_card_images.dart';
 import '../../models/news/news-models.dart';
 import 'news_card_simple.dart';
 
@@ -14,7 +15,7 @@ class NewsCard extends StatelessWidget {
         return NewsCardSimple(news: news);
       case "publication-with-images":
       // return NewsCardImages(news: news); // todavía no implementado
-        return const SizedBox.shrink();
+      return NewsCardImages(news: news);
       case "publication-with-survey":
       // return NewsCardSurvey(news: news); // todavía no implementado
         return const SizedBox.shrink();
