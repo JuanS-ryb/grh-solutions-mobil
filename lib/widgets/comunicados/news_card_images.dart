@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../../models/news/news-models.dart';
 import 'expandable_text.dart';
@@ -38,7 +39,7 @@ class NewsCardImages extends StatelessWidget {
                       ),
                       Text(
                         "${news.createdAt.day}/${news.createdAt.month}/${news.createdAt.year} "
-                        "- ${news.createdAt.hour.toString().padLeft(2, '0')}:${news.createdAt.minute.toString().padLeft(2, '0')}",
+                            "- ${news.createdAt.hour.toString().padLeft(2, '0')}:${news.createdAt.minute.toString().padLeft(2, '0')}",
                         style: const TextStyle(color: Colors.grey, fontSize: 12),
                       ),
                     ],
@@ -87,6 +88,34 @@ class _ImageGrid extends StatelessWidget {
 
   const _ImageGrid({required this.images});
 
+  // 🔧 Función para limpiar y decodificar base64
+  Uint8List? _decodeBase64Image(String base64String) {
+    try {
+      // Debug: imprimir los primeros caracteres
+      print('Base64 length: ${base64String.length}');
+      print('First 100 chars: ${base64String.substring(0, base64String.length > 100 ? 100 : base64String.length)}');
+
+      String cleanBase64 = base64String.trim();
+
+      // Remover el prefijo "data:image/...;base64," si existe
+      if (cleanBase64.contains(',')) {
+        cleanBase64 = cleanBase64.split(',').last;
+      }
+
+      // Remover espacios en blanco y saltos de línea
+      cleanBase64 = cleanBase64.replaceAll(RegExp(r'\s+'), '');
+
+      print('Clean base64 length: ${cleanBase64.length}');
+      print('First 50 chars clean: ${cleanBase64.substring(0, cleanBase64.length > 50 ? 50 : cleanBase64.length)}');
+
+      // Decodificar
+      return base64Decode(cleanBase64);
+    } catch (e) {
+      print('Error decoding base64: $e');
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     int count = images.length.clamp(1, 4); // máximo 4 visibles
@@ -104,15 +133,52 @@ class _ImageGrid extends StatelessWidget {
           crossAxisSpacing: spacing,
         ),
         itemBuilder: (context, index) {
+          final imageBytes = _decodeBase64Image(images[index].base64);
+
+          if (imageBytes == null) {
+            // Si hay error al decodificar, mostrar un contenedor con icono de error
+            return Container(
+              color: Colors.grey[300],
+              child: const Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.broken_image,
+                      color: Colors.grey,
+                      size: 40,
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Error',
+                      style: TextStyle(fontSize: 10, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
           return Container(
             decoration: BoxDecoration(
               color: Colors.grey[200],
-              image: DecorationImage(
-                image: MemoryImage(
-                  base64Decode(images[index].base64),
-                ),
-                fit: BoxFit.cover,
-              ),
+            ),
+            child: Image.memory(
+              imageBytes,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                print('Error loading image: $error');
+                return Container(
+                  color: Colors.grey[300],
+                  child: const Center(
+                    child: Icon(
+                      Icons.image_not_supported,
+                      color: Colors.grey,
+                      size: 40,
+                    ),
+                  ),
+                );
+              },
             ),
           );
         },

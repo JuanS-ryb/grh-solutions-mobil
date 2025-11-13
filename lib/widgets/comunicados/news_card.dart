@@ -14,8 +14,8 @@ class NewsCard extends StatelessWidget {
       case "simple-publication":
         return NewsCardSimple(news: news);
       case "publication-with-images":
-      // return NewsCardImages(news: news); // todavía no implementado
-      return NewsCardImages(news: news);
+        // return NewsCardImages(news: news); // todavía no implementado
+        return NewsCardImages(news: news);
       case "publication-with-survey":
       // return NewsCardSurvey(news: news); // todavía no implementado
         return const SizedBox.shrink();
