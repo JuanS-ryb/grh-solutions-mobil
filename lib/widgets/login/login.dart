@@ -162,6 +162,15 @@ class _LoginState extends State<Login> {
   }
 }
 
+String extractErrorMessage(Object e) {
+  String message = "Ocurrió un error inesperado.";
+
+  if (e.toString().contains("Exception:")) {
+    message = e.toString().split("Exception:").last.trim();
+  }
+  return message;
+}
+
 /// ------------------
 /// FORMULARIO LOGIN
 /// ------------------
@@ -237,9 +246,17 @@ class _LoginFormState extends State<LoginForm> {
         Navigator.of(context).pop();
       }
     } catch (e) {
-      debugPrint('Error from endpoint --------------------- $e.toString()');
       setState(() {
-        _error = "Hubo un error al comunicarse con el servidor";
+        _error = extractErrorMessage(e);
+      });
+
+      // 🔥 AUTO-DISMISS DEL BANNER
+      Future.delayed(const Duration(seconds: 3), () {
+        if (mounted) {
+          setState(() {
+            _error = null;
+          });
+        }
       });
     } finally {
       if (mounted) {
@@ -291,11 +308,35 @@ class _LoginFormState extends State<LoginForm> {
               ),
             ),
             const SizedBox(height: 24),
-            if (_error != null)
-              Text(
-                _error!,
-                style: const TextStyle(color: Colors.red),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 280),
+              curve: Curves.easeOut,
+              height: _error == null ? 0 : 50,
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: Colors.redAccent,
+                borderRadius: BorderRadius.circular(10),
               ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: _error == null
+                  ? null
+                  : Row(
+                      children: [
+                        const Icon(Icons.error_outline, color: Colors.white),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _error!,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
             const SizedBox(height: 8),
             SizedBox(
               width: double.infinity,
