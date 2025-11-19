@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:grhsolutions/widgets/noPermission/no-permission.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:grhsolutions/widgets/request/request.dart';
+import 'models/user/permissions.dart';
 import 'widgets/comunicados/comunicados.dart';
 import 'widgets/horario/horario.dart';
 import 'widgets/login/login.dart';
@@ -46,11 +48,82 @@ class MyApp extends StatelessWidget {
                 valueListenable: renderNotificator,
                 builder: (context, selectedIndex, _) {
                   final List<Widget> widgetOptions = [
-                    const Comunicados(),
-                    const Request(),
-                    const Vacant(),
-                    const Horario(),
-                    const ContractsPage(),
+                    // -------------------------------- COMUNICADOS
+                    FutureBuilder<bool>(
+                      future: permissions.checkPermission(
+                        Ident(
+                          method: "MODULO",
+                          originalUrl: "COMUNICADOS",
+                          module: null,
+                        ),
+                      ),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) return const SizedBox();
+                        return snapshot.data! ? const Comunicados() : const NoPermissionWidget(moduleName: "Comunicados");
+                      },
+                    ),
+
+                    // -------------------------------- SOLICITUDES / REQUEST
+                    FutureBuilder<bool>(
+                      future: permissions.checkPermission(
+                        Ident(
+                          method: "MODULO",
+                          originalUrl: "SOLICITUDES",
+                          module: null,
+                        ),
+                      ),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) return const SizedBox();
+                        return snapshot.data! ? const Request() : const NoPermissionWidget(moduleName: "Solicitudes");
+                      },
+                    ),
+
+                    // -------------------------------- VACANTES
+                    FutureBuilder<bool>(
+                      future: permissions.checkPermission(
+                        Ident(
+                          method: "MODULO",
+                          originalUrl: "VACANTES",
+                          module: null,
+                        ),
+                      ),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) return const SizedBox();
+                        return snapshot.data! ? const Vacant() : const NoPermissionWidget(moduleName: "Vacantes");
+                      },
+                    ),
+
+                    // -------------------------------- HORARIO
+                    FutureBuilder<bool>(
+                      future: permissions.checkPermission(
+                        Ident(
+                          method: "MODULO",
+                          originalUrl: "HORARIO",
+                          module: null,
+                        ),
+                      ),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) return const SizedBox();
+                        return snapshot.data! ? const Horario() : const NoPermissionWidget(moduleName: "Horario");
+                      },
+                    ),
+
+                    // -------------------------------- CONTRATOS
+                    FutureBuilder<bool>(
+                      future: permissions.checkPermission(
+                        Ident(
+                          method: "MODULO",
+                          originalUrl: "CONTRATOS",
+                          module: null,
+                        ),
+                      ),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) return const SizedBox();
+                        return snapshot.data! ? const ContractsPage() : const NoPermissionWidget(moduleName: "Contratos");
+                      },
+                    ),
+
+                    // -------------------------------- PERFIL (siempre visible)
                     const Perfil(),
                   ];
 

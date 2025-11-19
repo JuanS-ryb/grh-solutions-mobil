@@ -6,6 +6,7 @@ class Http {
 
   Http() {
     final String token = loginController.value?.token ?? '';
+    ///print(token);
 
     _dio = Dio(
       BaseOptions(
@@ -50,9 +51,9 @@ class Http {
   }
 
   // Método POST para crear un nuevo recurso
-  Future<Response> post(String path, {dynamic data}) async {
+  Future<Response> post(String path, {dynamic data, Map<String, dynamic>? overWriteHeader}) async {
     try {
-      final response = await _dio.post(path, data: data);
+      final response = await _dio.post(path, data: data, options: Options(headers: overWriteHeader));
       return response;
     } on DioException catch (e) {
       handleDioError(e, path);
@@ -64,9 +65,9 @@ class Http {
   }
 
   // Método PUT para actualizar un recurso existente
-  Future<Response> put(String path, dynamic id, {dynamic data}) async {
+  Future<Response> put(String path, dynamic id, {dynamic data, Map<String, dynamic>? overWriteHeader}) async {
     try {
-      final response = await _dio.put('$path/$id', data: data);
+      final response = await _dio.put('$path/$id', data: data, options: Options(headers: overWriteHeader));
       return response;
     } on DioException catch (e) {
       handleDioError(e, '$path/$id');

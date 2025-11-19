@@ -141,17 +141,18 @@ class _LoginState extends State<Login> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                ElevatedButton.icon(
+                /* ElevatedButton.icon(
                   onPressed: () => showRegisterModal(theme.cardColor),
                   icon: Icon(Icons.person_add, color: theme.iconTheme.color),
                   label: Text("REGISTRARSE", style: theme.textTheme.bodyMedium),
                   style: ElevatedButton.styleFrom(
+
                     minimumSize: const Size(double.infinity, 48),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                ),
+                ), */
               ],
             ),
           ),
@@ -198,10 +199,39 @@ class _LoginFormState extends State<LoginForm> {
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
-      debugPrint(
-          'Response from endpoint --------------------- $loginResponse.toString()');
-      isLoggedIn.value = true;
       loginController.value = loginResponse;
+      //print(loginResponse.token);
+
+      final verified = await loginServices.verify([
+        {
+        "method": "MODULO",
+        "originalUrl": "COMUNICADOS",
+        "module": null
+      },{
+        "method": "MODULO",
+        "originalUrl": "HORARIOS",
+        "module": null
+      },{
+        "method": "MODULO",
+        "originalUrl": "SOLICITUDES",
+        "module": null
+      },{
+        "method": "MODULO",
+        "originalUrl": "VACANTES",
+        "module": null
+      },{
+        "method": "MODULO",
+        "originalUrl": "CONTRATOS",
+        "module": null
+      },{
+        "method": "MODULO",
+        "originalUrl": "EMPLEADOS",
+        "module": null
+      }], loginResponse.token);
+
+      await permissions.updatePermissions(verified);
+
+      isLoggedIn.value = true;
 
       if (mounted) {
         Navigator.of(context).pop();

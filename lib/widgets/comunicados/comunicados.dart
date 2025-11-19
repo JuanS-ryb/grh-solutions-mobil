@@ -34,8 +34,8 @@ class _ComunicadosState extends State<Comunicados> {
     try {
       final result = await _service.getNews(page: _page, limit: 10);
 
-      print("Noticias recibidas: ${result.data.length}");
-      print("Total de páginas: ${result.totalPages}");
+      //print("Noticias recibidas: ${result.data.length}");
+      //print("Total de páginas: ${result.totalPages}");
 
       setState(() {
         _news.addAll(result.data);
