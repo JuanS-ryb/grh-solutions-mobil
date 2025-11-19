@@ -19,8 +19,11 @@ class _HorarioState extends State<Horario> {
 
   String grupo = '';
   Map<DateTime, String> horarios = {};
-  Map<DateTime, bool> inasistencias = {};
+  Map<DateTime, String> inasistencias = {}; // ahora guarda tipo/nombre
   String horarioGeneral = '';
+
+  // Helper para comparar solo año-mes-día
+  DateTime soloFecha(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
 
   @override
   void initState() {
@@ -31,7 +34,6 @@ class _HorarioState extends State<Horario> {
   Future<void> cargarHorariosYRequests() async {
     try {
       final List res = await horarioService.getHorarios();
-
       final Map<DateTime, String> mapaHorarios = {};
       String nombreGrupo = '';
 
@@ -40,8 +42,7 @@ class _HorarioState extends State<Horario> {
 
         try {
           final fechaInicio = DateTime.parse(h.startDate).toLocal();
-          final key =
-              DateTime(fechaInicio.year, fechaInicio.month, fechaInicio.day);
+          final key = soloFecha(fechaInicio);
 
           String tipo = h.scheduleType?.name ?? '';
           if (tipo.isNotEmpty) horarioGeneral = tipo;
@@ -56,29 +57,29 @@ class _HorarioState extends State<Horario> {
           continue;
         }
       }
+
+      // Cargar inasistencias
       final requests = await requestService.getRequests();
-      final Map<DateTime, bool> mapaInasistencias = {};
+      final Map<DateTime, String> mapaInasistencias = {};
 
       for (final req in requests) {
-        if ((req.typeRequest ?? '').toLowerCase().contains('inasistencia')) {
-          final fechaKey = DateTime(
-            req.createdAt.toLocal().year,
-            req.createdAt.toLocal().month,
-            req.createdAt.toLocal().day,
-          );
+if ((req.typeRequest ?? '').toLowerCase().contains('inasistencia')) {
+  final createdAt = req.createdAt.toLocal();
+  final fechaKey = soloFecha(createdAt);
 
-          // Guardar la fecha en el mapa
-          mapaInasistencias[fechaKey] = true;
-        }
+  // Guardamos el title, no el type_request
+  mapaInasistencias[fechaKey] = req.title ?? 'Inasistencia';
+}
       }
 
       if (mounted) {
         setState(() {
+          horarios = mapaHorarios;
           inasistencias = mapaInasistencias;
+          grupo = nombreGrupo;
         });
       }
-
-    } catch (e, stack) {
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error al cargar datos: $e')),
@@ -98,14 +99,12 @@ class _HorarioState extends State<Horario> {
       return;
     }
 
-    final claveSeleccionada =
-        DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day);
+    final claveSeleccionada = soloFecha(_selectedDay!);
 
     final horarioSeleccionado = horarios[claveSeleccionada];
 
-    // Actualizar inasistencias antes de navegar
     setState(() {
-      inasistencias[claveSeleccionada] = true;
+      inasistencias[claveSeleccionada] = 'Inasistencia registrada';
     });
 
     await Navigator.push(
@@ -120,9 +119,34 @@ class _HorarioState extends State<Horario> {
     );
   }
 
+void _mostrarModalInasistencia(DateTime fecha) {
+  final titulo = inasistencias[fecha] ?? 'Inasistencia registrada';
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text(titulo), 
+        content: const Text("Este día tiene registrada la inasistencia."),
+        actions: [
+          TextButton(
+            child: const Text("Cerrar"),
+            onPressed: () => Navigator.pop(context),
+          )
+        ],
+      );
+    },
+  );
+}
+
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
+    final clave = (_selectedDay == null) ? null : soloFecha(_selectedDay!);
+    final diaTieneInasistencia = clave != null && inasistencias.containsKey(clave);
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -139,59 +163,73 @@ class _HorarioState extends State<Horario> {
           const SizedBox(height: 4),
           Text(
             _selectedDay != null
-                ? (horarios[DateTime(_selectedDay!.year, _selectedDay!.month,
-                        _selectedDay!.day)] ??
-                    horarioGeneral ??
-                    "Sin horario")
+                ? (horarios[clave] ?? horarioGeneral ?? "Sin horario")
                 : "Selecciona un día para ver horario",
             style: const TextStyle(fontSize: 16, color: Colors.grey),
           ),
           const SizedBox(height: 12),
+
           TableCalendar(
             firstDay: DateTime.utc(2020, 1, 1),
             lastDay: DateTime.utc(2030, 12, 31),
             focusedDay: _focusedDay,
             locale: 'es_ES',
-            selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+            selectedDayPredicate: (day) => soloFecha(day) == clave,
             headerStyle: const HeaderStyle(
               formatButtonVisible: false,
               titleCentered: true,
             ),
             calendarStyle: const CalendarStyle(
-              todayDecoration: BoxDecoration(
-                  color: Colors.blueAccent, shape: BoxShape.circle),
+              todayDecoration:
+                  BoxDecoration(color: Colors.blueAccent, shape: BoxShape.circle),
               selectedDecoration:
-                  BoxDecoration(color: Colors.blue, shape: BoxShape.circle),
+                  BoxDecoration(color: Colors.green, shape: BoxShape.circle),
             ),
             rowHeight: 80,
+
             onDaySelected: (selectedDay, focusedDay) {
+              final claveSeleccionada = soloFecha(selectedDay);
               setState(() {
                 _selectedDay = selectedDay;
                 _focusedDay = focusedDay;
               });
+
+              if (inasistencias.containsKey(claveSeleccionada)) {
+                _mostrarModalInasistencia(claveSeleccionada);
+              }
             },
+
             calendarBuilders: CalendarBuilders(
-              defaultBuilder: (context, day, focusedDay) => _buildDayCell(day),
+              defaultBuilder: (context, day, focusedDay) =>
+                  _buildDayCell(day),
               todayBuilder: (context, day, focusedDay) =>
                   _buildDayCell(day, isToday: true),
               selectedBuilder: (context, day, focusedDay) =>
                   _buildDayCell(day, isSelected: true),
             ),
           ),
+
           const Spacer(),
+
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
-              onPressed: _navegarACrearInasistencia,
+              onPressed: (!diaTieneInasistencia && _selectedDay != null)
+                  ? _navegarACrearInasistencia
+                  : null,
               style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(50),
-                  backgroundColor:
-                      _selectedDay != null ? Colors.blue : Colors.grey),
+                minimumSize: const Size.fromHeight(50),
+                backgroundColor:
+                    (!diaTieneInasistencia && _selectedDay != null)
+                        ? Colors.blue
+                        : Colors.grey,
+              ),
               child: Text(
-                  _selectedDay != null
-                      ? "Generar Inasistencia"
-                      : "Selecciona un día",
-                  style: const TextStyle(color: Colors.white)),
+                (!diaTieneInasistencia)
+                    ? "Generar Inasistencia"
+                    : "Ya existe inasistencia",
+                style: const TextStyle(color: Colors.white),
+              ),
             ),
           )
         ],
@@ -201,7 +239,7 @@ class _HorarioState extends State<Horario> {
 
   Widget _buildDayCell(DateTime day,
       {bool isToday = false, bool isSelected = false}) {
-    final clave = DateTime(day.year, day.month, day.day);
+    final clave = soloFecha(day);
     final bool tieneInasistencia = inasistencias.containsKey(clave);
     final bool esHoy = isSameDay(day, DateTime.now());
 
@@ -210,7 +248,6 @@ class _HorarioState extends State<Horario> {
     return Stack(
       alignment: Alignment.center,
       children: [
-        // Fondo para inasistencia (rojo) excepto hoy
         if (tieneInasistencia && !esHoy)
           Container(
             width: 40,
@@ -220,23 +257,19 @@ class _HorarioState extends State<Horario> {
               shape: BoxShape.circle,
             ),
           ),
-
-        // Fondo para hoy o seleccionado (si no tiene inasistencia o es hoy)
         if (!tieneInasistencia || esHoy)
           Container(
             width: 40,
             height: 40,
             decoration: BoxDecoration(
               color: isSelected
-                  ? Colors.blue
+                  ? Colors.green
                   : isToday
                       ? Colors.blueAccent
                       : Colors.transparent,
               shape: BoxShape.circle,
             ),
           ),
-
-        // Número del día
         Text(
           '${day.day}',
           style: TextStyle(
@@ -244,11 +277,8 @@ class _HorarioState extends State<Horario> {
                 ? Colors.white
                 : Colors.black,
             fontWeight: FontWeight.bold,
-            fontSize: 14,
           ),
         ),
-
-        // Horario debajo del número
         Positioned(
           bottom: -2,
           child: SizedBox(
@@ -260,9 +290,7 @@ class _HorarioState extends State<Horario> {
                 color: (horario != null && horario.isNotEmpty)
                     ? Colors.blue
                     : Colors.grey,
-                fontWeight: (horario != null && horario.isNotEmpty)
-                    ? FontWeight.w500
-                    : FontWeight.normal,
+                fontWeight: FontWeight.w500,
               ),
               textAlign: TextAlign.center,
               maxLines: 1,
