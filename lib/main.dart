@@ -98,13 +98,13 @@ class MyApp extends StatelessWidget {
                       future: permissions.checkPermission(
                         Ident(
                           method: "MODULO",
-                          originalUrl: "HORARIO",
+                          originalUrl: "HORARIOS",
                           module: null,
                         ),
                       ),
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) return const SizedBox();
-                        return snapshot.data! ? const Horario() : const NoPermissionWidget(moduleName: "Horario");
+                        return snapshot.data! ? const Horario() : const NoPermissionWidget(moduleName: "Horarios");
                       },
                     ),
 
