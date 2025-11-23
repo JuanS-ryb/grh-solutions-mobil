@@ -88,34 +88,21 @@ class _ImageGrid extends StatelessWidget {
 
   const _ImageGrid({required this.images});
 
-  // 🔧 Función para limpiar y decodificar base64
   Uint8List? _decodeBase64Image(String base64String) {
     try {
-      // Debug: imprimir los primeros caracteres
-      print('Base64 length: ${base64String.length}');
-      print('First 100 chars: ${base64String.substring(0, base64String.length > 100 ? 100 : base64String.length)}');
+      // Remover encabezado MIME si existe
+      final regex = RegExp(r'data:image/[^;]+;base64,');
+      base64String = base64String.replaceAll(regex, '');
 
-      String cleanBase64 = base64String.trim();
+      // Limpiar espacios/saltos de línea
+      base64String = base64String.replaceAll(RegExp(r'\s+'), '');
 
-      // Remover el prefijo "data:image/...;base64," si existe
-      if (cleanBase64.contains(',')) {
-        cleanBase64 = cleanBase64.split(',').last;
-      }
-
-      // Remover espacios en blanco y saltos de línea
-      cleanBase64 = cleanBase64.replaceAll(RegExp(r'\s+'), '');
-
-      print('Clean base64 length: ${cleanBase64.length}');
-      print('First 50 chars clean: ${cleanBase64.substring(0, cleanBase64.length > 50 ? 50 : cleanBase64.length)}');
-
-      // Decodificar
-      return base64Decode(cleanBase64);
+      return base64Decode(base64String);
     } catch (e) {
       print('Error decoding base64: $e');
       return null;
     }
   }
-
   @override
   Widget build(BuildContext context) {
     int count = images.length.clamp(1, 4); // máximo 4 visibles
